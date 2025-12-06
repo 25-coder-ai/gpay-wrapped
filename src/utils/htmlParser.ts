@@ -115,11 +115,6 @@ export function parseMyActivityHTML(htmlString: string): HTMLParseResult {
         // Also get just the content cell text for parsing
         const contentText = contentCell.textContent?.trim() || '';
 
-        // Debug: log some activities to see their structure
-        if (index >= 0 && index <= 5) {
-          console.log(`Activity ${index} fullCellText:`, JSON.stringify(fullCellText.substring(0, 400)));
-        }
-
         // Check if this activity is marked as Failed
         // Failed transactions contain the word "Failed" somewhere in the FULL cell content
         const failureKeywords = ['failed', 'declined', 'cancelled', 'canceled', 'rejected', 'unsuccessful'];
