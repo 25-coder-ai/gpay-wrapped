@@ -5,15 +5,35 @@ import { Transaction, GroupExpense, CashbackReward, Voucher, ActivityRecord } fr
 export type YearFilter = '2025' | 'all';
 
 /**
- * Filter transactions by year
+ * Check if a transaction status indicates failure
+ */
+function isFailedTransaction(status: string): boolean {
+  if (!status) return false;
+  const lowerStatus = status.toLowerCase();
+  const failedStatuses = ['failed', 'declined', 'cancelled', 'canceled', 'rejected', 'error', 'refund', 'reversed'];
+  return failedStatuses.some(s => lowerStatus.includes(s));
+}
+
+/**
+ * Filter transactions by year (excludes failed transactions)
  */
 export function filterTransactionsByYear(
   transactions: Transaction[],
   year: YearFilter
 ): Transaction[] {
-  if (year === 'all') return transactions;
+  // First filter out failed transactions
+  const failedCount = transactions.filter(t => isFailedTransaction(t.status)).length;
+  const successfulTransactions = transactions.filter(t => !isFailedTransaction(t.status));
 
-  return transactions.filter(t => {
+  console.log(`Transactions: ${transactions.length} total, ${failedCount} failed, ${successfulTransactions.length} successful`);
+
+  // Log unique statuses for debugging
+  const uniqueStatuses = [...new Set(transactions.map(t => t.status))];
+  console.log('Unique transaction statuses:', uniqueStatuses);
+
+  if (year === 'all') return successfulTransactions;
+
+  return successfulTransactions.filter(t => {
     const transactionYear = t.time.getFullYear();
     return transactionYear === parseInt(year);
   });
@@ -65,15 +85,70 @@ export function filterVouchersByYear(
 }
 
 /**
- * Filter activities by year
+ * Check if an activity indicates a failed transaction
+ */
+function isFailedActivity(activity: ActivityRecord): boolean {
+  const title = activity.title.toLowerCase();
+  const description = (activity.description || '').toLowerCase();
+
+  // Check for explicit "Failed" status (common in GPay HTML exports)
+  // The word "Failed" often appears on its own line in the description
+  const failedKeywords = [
+    'failed',
+    'declined',
+    'cancelled',
+    'canceled',
+    'rejected',
+    'unsuccessful',
+    'could not',
+    'refund',
+    'reversed',
+    'pending',  // Also exclude pending transactions
+  ];
+
+  // Check title
+  if (failedKeywords.some(keyword => title.includes(keyword))) {
+    return true;
+  }
+
+  // Check description - look for "Failed" as a standalone word or at end of line
+  if (failedKeywords.some(keyword => description.includes(keyword))) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Filter activities by year (excludes failed activities)
  */
 export function filterActivitiesByYear(
   activities: ActivityRecord[],
   year: YearFilter
 ): ActivityRecord[] {
-  if (year === 'all') return activities;
+  // First filter out failed activities
+  const failedActivities = activities.filter(a => isFailedActivity(a));
+  const successfulActivities = activities.filter(a => !isFailedActivity(a));
 
-  return activities.filter(activity => {
+  console.log(`Activities: ${activities.length} total, ${failedActivities.length} failed, ${successfulActivities.length} successful`);
+
+  // Log a few failed activities for debugging
+  if (failedActivities.length > 0) {
+    console.log('Sample failed activities:', failedActivities.slice(0, 5).map(a => ({
+      title: a.title,
+      description: a.description?.substring(0, 100),
+    })));
+  }
+
+  // Also log a few that passed to verify they don't contain "failed"
+  console.log('Sample successful activities:', successfulActivities.slice(0, 3).map(a => ({
+    title: a.title,
+    description: a.description?.substring(0, 100),
+  })));
+
+  if (year === 'all') return successfulActivities;
+
+  return successfulActivities.filter(activity => {
     const activityYear = activity.time.getFullYear();
     return activityYear === parseInt(year);
   });

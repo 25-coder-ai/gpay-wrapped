@@ -21,6 +21,20 @@
   @apply text-2xl font-bold mb-8;
 }
 
+.totalSpentCard {
+  @apply bg-gradient-to-r from-green-400/30 to-emerald-500/30
+         rounded-2xl p-8 mb-8 border border-white/30;
+}
+
+.totalSpentAmount {
+  @apply text-6xl font-black mb-2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.totalSpentLabel {
+  @apply text-lg opacity-90;
+}
+
 .stats {
   @apply grid grid-cols-2 md:grid-cols-4 gap-6 mb-8;
 }
@@ -39,6 +53,18 @@
 
 .message {
   @apply text-base leading-relaxed mb-8 opacity-90;
+}
+
+.actionButtons {
+  @apply flex flex-col sm:flex-row gap-4 justify-center mt-8;
+}
+
+.categoriesButton {
+  @apply bg-gradient-to-r from-purple-500 to-pink-500 text-white
+         border-0 px-8 py-3 text-base font-semibold
+         rounded-lg cursor-pointer transition-all duration-300
+         hover:-translate-y-0.5 hover:shadow-lg
+         active:translate-y-0;
 }
 
 .backButton {

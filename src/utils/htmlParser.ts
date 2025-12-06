@@ -96,6 +96,8 @@ export function parseMyActivityHTML(htmlString: string): HTMLParseResult {
     const outerCells = doc.querySelectorAll('.outer-cell');
     console.log(`Found ${outerCells.length} activity records`);
 
+    let failedCount = 0;
+
     outerCells.forEach((cell, index) => {
       try {
         // Get the header (product name, usually "Google Pay")
@@ -106,9 +108,25 @@ export function parseMyActivityHTML(htmlString: string): HTMLParseResult {
         const contentCell = cell.querySelector('.content-cell');
         if (!contentCell) return;
 
+        // Get the full HTML content to check for "Failed" badge
+        const contentHTML = contentCell.innerHTML || '';
         const contentText = contentCell.textContent?.trim() || '';
 
-        // Split by <br> to get description and date
+        // Check if this activity is marked as Failed
+        // Failed transactions have "Failed" text in the content
+        const isFailed = contentText.toLowerCase().includes('failed') ||
+                        contentHTML.toLowerCase().includes('failed');
+
+        if (isFailed) {
+          failedCount++;
+          // Skip failed transactions - don't add them to activities
+          if (index < 10 || failedCount <= 5) {
+            console.log(`Skipping failed activity ${index}:`, contentText.substring(0, 100));
+          }
+          return;
+        }
+
+        // Split by newlines to get description and date
         const parts = contentText.split('\n').map(p => p.trim()).filter(Boolean);
 
         if (parts.length === 0) return;
@@ -121,7 +139,7 @@ export function parseMyActivityHTML(htmlString: string): HTMLParseResult {
         if (dateStr) {
           // Google uses format like "4 Dec 2025, 10:30:00 IST"
           // Remove timezone and parse
-          const cleanDateStr = dateStr.replace(/,?\s*IST$/, '').trim();
+          const cleanDateStr = dateStr.replace(/,?\s*(IST|GMT[+-]\d{2}:\d{2})$/, '').trim();
           activityDate = new Date(cleanDateStr);
         }
 
@@ -162,7 +180,7 @@ export function parseMyActivityHTML(htmlString: string): HTMLParseResult {
       }
     });
 
-    console.log(`Successfully parsed ${activities.length} activities from ${outerCells.length} cells`);
+    console.log(`Successfully parsed ${activities.length} activities from ${outerCells.length} cells (${failedCount} failed transactions skipped)`);
 
     return { success: true, data: activities };
   } catch (error) {

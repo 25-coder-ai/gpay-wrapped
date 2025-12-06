@@ -40,8 +40,11 @@ export function calculateExpensiveDayInsight(
 
   if (!maxDate || maxAmount === 0) return null;
 
+  // Cast to Date after null check to help TypeScript
+  const expensiveDay: Date = maxDate;
+
   // NEW: Check activity correlation on the same day
-  const expensiveDayStr = maxDate.toISOString().slice(0, 10);
+  const expensiveDayStr = expensiveDay.toISOString().slice(0, 10);
   const activitiesOnDay = activities.filter(a => {
     const activityDateStr = a.time.toISOString().slice(0, 10);
     return (

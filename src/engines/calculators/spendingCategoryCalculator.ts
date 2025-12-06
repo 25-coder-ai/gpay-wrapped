@@ -89,6 +89,8 @@ export function calculateSpendingCategoryInsight(
     Groceries: `Home chef! ₹${Math.round(topAmount).toLocaleString()} on groceries`,
     Clothing: `Fashionista! ₹${Math.round(topAmount).toLocaleString()} on clothing`,
     Investments: `Smart saver! ₹${Math.round(topAmount).toLocaleString()} invested`,
+    Transfers: `Social butterfly! ₹${Math.round(topAmount).toLocaleString()} sent to friends & family`,
+    'Bank Transfers': `Moving money! ₹${Math.round(topAmount).toLocaleString()} in bank transfers`,
     Others: `Diverse spender! ₹${Math.round(topAmount).toLocaleString()} across ${topCount} payments`,
   };
 

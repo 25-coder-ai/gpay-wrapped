@@ -80,7 +80,7 @@ export function parseGroupExpensesJSON(jsonString: string): JSONParseResult<Grou
           return null;
         }
       })
-      .filter((item): item is GroupExpense => item !== null);
+      .filter((item: GroupExpense | null): item is GroupExpense => item !== null);
 
     console.log(`Transformed ${expenses.length} expenses to ${transformedExpenses.length} valid items`);
     return { success: true, data: transformedExpenses };
@@ -143,7 +143,7 @@ export function parseVoucherRewardsJSON(jsonString: string): JSONParseResult<Vou
           return null;
         }
       })
-      .filter((item): item is Voucher => item !== null);
+      .filter((item: Voucher | null): item is Voucher => item !== null);
 
     console.log(`Transformed ${vouchers.length} vouchers to ${transformedVouchers.length} valid items`);
     return { success: true, data: transformedVouchers };

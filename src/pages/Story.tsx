@@ -1,15 +1,54 @@
+import { useMemo } from 'react';
 import { useDataStore } from '../stores/dataStore';
 import { useNavigate } from 'react-router-dom';
+import { convertToINR } from '../utils/categoryUtils';
+import { filterTransactionsByYear, filterActivitiesByYear } from '../utils/dateUtils';
 import styles from './Story.module.css';
 
 export default function Story() {
   const navigate = useNavigate();
   const { parsedData, insights, selectedYear } = useDataStore();
 
+  // Filter data by selected year
+  const filteredData = useMemo(() => {
+    if (!parsedData) return null;
+    return {
+      transactions: filterTransactionsByYear(parsedData.transactions, selectedYear),
+      activities: filterActivitiesByYear(parsedData.activities, selectedYear),
+    };
+  }, [parsedData, selectedYear]);
+
+  // Calculate total spent
+  const totalSpent = useMemo(() => {
+    if (!filteredData) return 0;
+
+    // Sum from transactions
+    const transactionTotal = filteredData.transactions.reduce(
+      (sum, t) => sum + convertToINR(t.amount),
+      0
+    );
+
+    // Sum from activities (sent and paid only)
+    const activityTotal = filteredData.activities
+      .filter(a => a.amount && (a.transactionType === 'sent' || a.transactionType === 'paid'))
+      .reduce((sum, a) => sum + convertToINR(a.amount!), 0);
+
+    return transactionTotal + activityTotal;
+  }, [filteredData]);
+
   if (!parsedData) {
     navigate('/');
     return null;
   }
+
+  const formatAmount = (amount: number) => {
+    if (amount >= 100000) {
+      return `${(amount / 100000).toFixed(1)}L`;
+    } else if (amount >= 1000) {
+      return `${(amount / 1000).toFixed(1)}K`;
+    }
+    return Math.round(amount).toLocaleString();
+  };
 
   return (
     <div className={styles.story}>
@@ -17,19 +56,26 @@ export default function Story() {
         <h1 className={styles.title}>Your GPay Wrapped {selectedYear === 'all' ? '(All Time)' : selectedYear}</h1>
 
         <div className={styles.debugInfo}>
-          <h2>Data Loaded Successfully! 🎉</h2>
+          <h2>Data Loaded Successfully!</h2>
+
+          {/* Total Spent Highlight */}
+          <div className={styles.totalSpentCard}>
+            <div className={styles.totalSpentAmount}>₹{formatAmount(totalSpent)}</div>
+            <div className={styles.totalSpentLabel}>Total Spent in {selectedYear === 'all' ? 'All Time' : selectedYear}</div>
+          </div>
+
           <div className={styles.stats}>
             <div className={styles.stat}>
-              <div className={styles.statNumber}>{parsedData.transactions.length}</div>
+              <div className={styles.statNumber}>{filteredData?.activities.length ?? 0}</div>
+              <div className={styles.statLabel}>Activities</div>
+            </div>
+            <div className={styles.stat}>
+              <div className={styles.statNumber}>{filteredData?.transactions.length ?? 0}</div>
               <div className={styles.statLabel}>Transactions</div>
             </div>
             <div className={styles.stat}>
               <div className={styles.statNumber}>{parsedData.groupExpenses.length}</div>
               <div className={styles.statLabel}>Group Expenses</div>
-            </div>
-            <div className={styles.stat}>
-              <div className={styles.statNumber}>{parsedData.cashbackRewards.length}</div>
-              <div className={styles.statLabel}>Cashback Rewards</div>
             </div>
             <div className={styles.stat}>
               <div className={styles.statNumber}>{parsedData.voucherRewards.length}</div>
@@ -57,14 +103,14 @@ export default function Story() {
             )}
           </div>
 
-          <p className={styles.message}>
-            Story mode UI with swipeable cards will be implemented in Phase 3!<br />
-            For now, you can see your insights have been calculated.
-          </p>
-
-          <button onClick={() => navigate('/')} className={styles.backButton}>
-            Upload Another File
-          </button>
+          <div className={styles.actionButtons}>
+            <button onClick={() => navigate('/categories')} className={styles.categoriesButton}>
+              View Spending Categories
+            </button>
+            <button onClick={() => navigate('/')} className={styles.backButton}>
+              Upload Another File
+            </button>
+          </div>
         </div>
       </div>
     </div>
