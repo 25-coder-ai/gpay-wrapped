@@ -1,0 +1,107 @@
+.processing {
+  @apply min-h-screen flex items-center justify-center
+         bg-gradient-to-br from-primary-500 to-secondary-500 p-5;
+}
+
+.container {
+  @apply text-center text-white max-w-lg w-full;
+}
+
+.title {
+  @apply text-4xl font-extrabold mb-3 m-0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  @apply text-lg mb-10 opacity-90;
+}
+
+.stagesContainer {
+  @apply flex justify-center gap-8 mb-12 flex-wrap;
+}
+
+.stage {
+  @apply flex flex-col items-center gap-3 opacity-40 transition-all duration-300;
+}
+
+.stageActive {
+  @apply opacity-100 scale-110;
+}
+
+.stageComplete {
+  @apply opacity-100;
+}
+
+.stageIcon {
+  @apply text-4xl w-16 h-16 flex items-center justify-center
+         bg-white/20 rounded-full backdrop-blur-sm;
+}
+
+.stageComplete .stageIcon {
+  @apply bg-white/30 text-green-400;
+}
+
+.stageLabel {
+  @apply text-sm font-medium;
+}
+
+.loader {
+  @apply flex justify-center mb-8;
+}
+
+.spinner {
+  @apply w-12 h-12 border-4 border-white/30 border-t-white rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.privacyNote {
+  @apply text-sm opacity-80 mt-8;
+}
+
+/* Error state */
+.errorContainer {
+  @apply text-center text-white;
+}
+
+.errorIcon {
+  @apply text-6xl mb-4;
+}
+
+.errorTitle {
+  @apply text-3xl font-bold mb-4;
+}
+
+.errorMessage {
+  @apply text-lg mb-8 opacity-90 bg-white/10 p-4 rounded-lg;
+}
+
+.retryButton {
+  @apply bg-white text-primary-600 border-0 px-8 py-3 text-base font-semibold
+         rounded-lg cursor-pointer transition-all duration-300
+         hover:-translate-y-0.5 hover:shadow-lg
+         active:translate-y-0;
+}
+
+@media (max-width: 768px) {
+  .title {
+    @apply text-3xl;
+  }
+
+  .stagesContainer {
+    @apply gap-4;
+  }
+
+  .stageIcon {
+    @apply text-3xl w-12 h-12;
+  }
+
+  .stageLabel {
+    @apply text-xs;
+  }
+}

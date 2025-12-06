@@ -1,0 +1,63 @@
+.story {
+  @apply min-h-screen flex items-center justify-center
+         bg-gradient-to-br from-primary-500 to-secondary-500 p-5;
+}
+
+.container {
+  @apply text-center text-white max-w-4xl w-full;
+}
+
+.title {
+  @apply text-4xl font-extrabold mb-10 m-0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.debugInfo {
+  @apply bg-white/15 backdrop-blur-md rounded-xl p-8
+         border border-white/20;
+}
+
+.debugInfo h2 {
+  @apply text-2xl font-bold mb-8;
+}
+
+.stats {
+  @apply grid grid-cols-2 md:grid-cols-4 gap-6 mb-8;
+}
+
+.stat {
+  @apply bg-white/10 rounded-lg p-4;
+}
+
+.statNumber {
+  @apply text-4xl font-extrabold mb-2;
+}
+
+.statLabel {
+  @apply text-sm opacity-80;
+}
+
+.message {
+  @apply text-base leading-relaxed mb-8 opacity-90;
+}
+
+.backButton {
+  @apply bg-white text-primary-600 border-0 px-8 py-3 text-base font-semibold
+         rounded-lg cursor-pointer transition-all duration-300
+         hover:-translate-y-0.5 hover:shadow-lg
+         active:translate-y-0;
+}
+
+@media (max-width: 768px) {
+  .title {
+    @apply text-3xl;
+  }
+
+  .stats {
+    @apply grid-cols-2;
+  }
+
+  .statNumber {
+    @apply text-3xl;
+  }
+}

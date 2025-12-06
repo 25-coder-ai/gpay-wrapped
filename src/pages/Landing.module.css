@@ -1,0 +1,63 @@
+.landing {
+  @apply min-h-screen flex flex-col bg-gradient-to-br from-primary-500 to-secondary-500 p-5;
+}
+
+.header {
+  @apply text-center py-10 px-5 text-white;
+}
+
+.title {
+  @apply text-5xl font-extrabold m-0 mb-3;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  @apply text-xl font-normal m-0 opacity-95;
+}
+
+.main {
+  @apply flex-1 flex items-center justify-center p-5;
+}
+
+.footer {
+  @apply py-8 px-5 flex justify-center;
+}
+
+.privacyBadge {
+  @apply flex items-center gap-4 bg-white/15 backdrop-blur-md
+         px-6 py-4 rounded-xl border border-white/20 text-white max-w-md;
+}
+
+.badgeIcon {
+  @apply text-3xl;
+}
+
+.badgeContent {
+  @apply text-left;
+}
+
+.badgeTitle {
+  @apply block text-base font-semibold mb-1;
+}
+
+.badgeText {
+  @apply m-0 text-sm opacity-90;
+}
+
+@media (max-width: 768px) {
+  .title {
+    @apply text-4xl;
+  }
+
+  .subtitle {
+    @apply text-lg;
+  }
+
+  .privacyBadge {
+    @apply flex-col text-center;
+  }
+
+  .badgeContent {
+    @apply text-center;
+  }
+}
