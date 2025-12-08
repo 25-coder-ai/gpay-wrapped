@@ -50,7 +50,7 @@ export function calculateSmallestPaymentInsight(
     title: 'Smallest Payment',
     tone: 'funny',
     data: {
-      amount: smallest.amount!,
+      amount: { value: smallestINR, currency: 'INR' },
       description: smallest.title,
       date: smallest.time,
     },

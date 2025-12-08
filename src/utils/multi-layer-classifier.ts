@@ -322,7 +322,7 @@ export const parseActivityHTML = (htmlContent: string): Transaction[] => {
   const paidToPattern = /Paid ₹([\d,.]+) to ([^<]+)/gi;
   const sentToPattern = /Sent ₹([\d,.]+) to ([^<]+)/gi;
 
-  const extractTransactions = (pattern: RegExp, type: 'Paid' | 'Sent') => {
+  const extractTransactions = (pattern: RegExp) => {
     let match;
     while ((match = pattern.exec(htmlContent)) !== null) {
       const amountStr = match[1].replace(/,/g, '');
@@ -357,8 +357,8 @@ export const parseActivityHTML = (htmlContent: string): Transaction[] => {
     }
   };
 
-  extractTransactions(paidToPattern, 'Paid');
-  extractTransactions(sentToPattern, 'Sent');
+  extractTransactions(paidToPattern);
+  extractTransactions(sentToPattern);
 
   return transactions;
 };

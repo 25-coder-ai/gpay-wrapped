@@ -84,13 +84,17 @@ export function calculateSpendingCategoryInsight(
     'Travel & Transport': `Always on the move! ₹${Math.round(topAmount).toLocaleString()} on travel`,
     'E-commerce': `Shopping spree! ₹${Math.round(topAmount).toLocaleString()} on online shopping`,
     'Utilities & Bills': `Responsible adult! ₹${Math.round(topAmount).toLocaleString()} on bills`,
+    'Bills & Utilities': `Responsible adult! ₹${Math.round(topAmount).toLocaleString()} on bills`,
     Education: `Investing in knowledge! ₹${Math.round(topAmount).toLocaleString()} on education`,
     Healthcare: `Health first! ₹${Math.round(topAmount).toLocaleString()} on healthcare`,
     Groceries: `Home chef! ₹${Math.round(topAmount).toLocaleString()} on groceries`,
     Clothing: `Fashionista! ₹${Math.round(topAmount).toLocaleString()} on clothing`,
     Investments: `Smart saver! ₹${Math.round(topAmount).toLocaleString()} invested`,
+    'Investment & Finance': `Smart saver! ₹${Math.round(topAmount).toLocaleString()} invested`,
     Transfers: `Social butterfly! ₹${Math.round(topAmount).toLocaleString()} sent to friends & family`,
     'Bank Transfers': `Moving money! ₹${Math.round(topAmount).toLocaleString()} in bank transfers`,
+    'Transfers & Payments': `Moving money! ₹${Math.round(topAmount).toLocaleString()} in transfers`,
+    'Services & Miscellaneous': `Diverse spender! ₹${Math.round(topAmount).toLocaleString()} across ${topCount} payments`,
     Others: `Diverse spender! ₹${Math.round(topAmount).toLocaleString()} across ${topCount} payments`,
   };
 

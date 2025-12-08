@@ -3,6 +3,7 @@
 import { ActivityRecord, Currency } from '../types/data.types';
 import { parseCurrency } from './currencyUtils';
 import { classifyTransaction } from './multi-layer-classifier';
+import type { TransactionCategory } from './categoryUtils';
 
 export interface HTMLParseResult {
   success: boolean;
@@ -208,7 +209,7 @@ export function parseMyActivityHTML(htmlString: string): HTMLParseResult {
             amount,
             recipient,
             sender,
-            category: classifyTransaction(title + ' ' + contentText, amountValue),
+            category: classifyTransaction(title + ' ' + contentText, amountValue) as TransactionCategory,
           });
         }
 
@@ -232,7 +233,7 @@ export function parseMyActivityHTML(htmlString: string): HTMLParseResult {
     // Get year breakdown BEFORE filtering
     const yearBreakdown = new Map<number, { total: number; failed: number; successful: number }>();
 
-    outerCells.forEach((cell, index) => {
+    outerCells.forEach((cell) => {
       try {
         const contentCell = cell.querySelector('.content-cell');
         if (!contentCell) return;

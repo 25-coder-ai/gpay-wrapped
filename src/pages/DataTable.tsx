@@ -26,7 +26,7 @@ interface TableRow {
   category?: string;
   status?: string;
   recipient?: string;
-  direction?: 'sent' | 'received' | 'paid' | 'other';
+  direction?: 'sent' | 'received' | 'paid' | 'request' | 'other';
 }
 
 export default function DataTable() {
@@ -285,6 +285,7 @@ export default function DataTable() {
             sent: { label: '↑ Sent', className: styles.directionSent },
             paid: { label: '↑ Paid', className: styles.directionPaid },
             received: { label: '↓ Received', className: styles.directionReceived },
+            request: { label: '↓ Request', className: styles.directionReceived },
             other: { label: '-', className: styles.directionOther },
           };
 

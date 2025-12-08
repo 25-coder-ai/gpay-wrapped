@@ -22,11 +22,15 @@ const CATEGORY_COLORS: Record<TransactionCategory, string> = {
   'E-commerce': '#3B82F6',
   'Travel & Transport': '#10B981',
   'Utilities & Bills': '#6366F1',
+  'Bills & Utilities': '#6366F1',
   Healthcare: '#EC4899',
   Education: '#14B8A6',
   Investments: '#22C55E',
+  'Investment & Finance': '#22C55E',
   Transfers: '#8B5CF6',
   'Bank Transfers': '#0EA5E9',
+  'Transfers & Payments': '#0EA5E9',
+  'Services & Miscellaneous': '#94A3B8',
   Others: '#94A3B8',
 };
 
@@ -38,11 +42,15 @@ const CATEGORY_ICONS: Record<TransactionCategory, string> = {
   'E-commerce': '🛍️',
   'Travel & Transport': '🚗',
   'Utilities & Bills': '💡',
+  'Bills & Utilities': '💡',
   Healthcare: '🏥',
   Education: '📚',
   Investments: '📈',
+  'Investment & Finance': '📈',
   Transfers: '💸',
   'Bank Transfers': '🏦',
+  'Transfers & Payments': '🏦',
+  'Services & Miscellaneous': '📦',
   Others: '📦',
 };
 
