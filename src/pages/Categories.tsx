@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { convertToINR, TransactionCategory, categorizeTransaction } from '../utils/categoryUtils';
 import { filterTransactionsByYear, filterActivitiesByYear } from '../utils/dateUtils';
 import { Currency } from '../types/data.types';
+import NoDataRedirect from '../components/NoDataRedirect';
 import styles from './Categories.module.css';
 
 interface TransactionItem {
@@ -119,8 +120,7 @@ export default function Categories() {
   }, [categoryData]);
 
   if (!parsedData) {
-    navigate('/');
-    return null;
+    return <NoDataRedirect />;
   }
 
   const formatAmount = (amount: number) => {

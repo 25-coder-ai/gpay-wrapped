@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { convertToINR } from '../utils/categoryUtils';
 import { filterTransactionsByYear, filterActivitiesByYear } from '../utils/dateUtils';
+import NoDataRedirect from '../components/NoDataRedirect';
 import styles from './Wrapped.module.css';
 
 interface SlideData {
@@ -229,8 +230,7 @@ export default function Wrapped() {
   };
 
   if (!parsedData || slides.length === 0) {
-    navigate('/');
-    return null;
+    return <NoDataRedirect />;
   }
 
   const slide = slides[currentSlide];

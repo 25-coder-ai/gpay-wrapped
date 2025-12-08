@@ -14,6 +14,7 @@ import {
 } from '@tanstack/react-table';
 import { convertToINR } from '../utils/categoryUtils';
 import Tooltip from '../components/Tooltip';
+import NoDataRedirect from '../components/NoDataRedirect';
 import styles from './DataTable.module.css';
 
 interface TableRow {
@@ -362,8 +363,7 @@ export default function DataTable() {
   });
 
   if (!parsedData) {
-    navigate('/');
-    return null;
+    return <NoDataRedirect />;
   }
 
   const formatAmount = (amount: number) => {
