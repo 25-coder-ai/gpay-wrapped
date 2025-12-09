@@ -3,6 +3,17 @@
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
+/* Header */
+.header {
+  @apply flex items-center justify-center py-3 px-4;
+}
+
+.headerTitle {
+  @apply text-white text-sm font-semibold tracking-wide;
+  opacity: 0.9;
+  letter-spacing: 0.05em;
+}
+
 /* Progress bar at top */
 .progressBar {
   @apply flex gap-1 p-3 px-4;
@@ -19,9 +30,10 @@
 
 /* Main slide container */
 .slideContainer {
-  @apply flex-1 flex items-center justify-center p-4 cursor-pointer overflow-hidden;
+  @apply flex-1 flex items-center justify-center gap-4 p-4 overflow-hidden;
   -webkit-tap-highlight-color: transparent;
   min-height: 0;
+  position: relative;
 }
 
 .slideWrapper {
@@ -29,15 +41,61 @@
   max-height: 100%;
 }
 
-.shareIcon {
-  @apply absolute top-4 right-4 w-9 h-9 rounded-full
-         bg-black/20 backdrop-blur-sm border border-white/20
-         text-white text-sm font-medium
+/* Navigation arrows */
+.navArrow {
+  @apply w-12 h-12 rounded-full
+         bg-white/10 backdrop-blur-md border border-white/20
+         text-white
          flex items-center justify-center
-         cursor-pointer transition-all duration-200
-         hover:bg-black/30 hover:scale-105
-         active:scale-95 disabled:opacity-50;
+         cursor-pointer transition-all duration-300
+         hover:bg-white/20 hover:scale-110 hover:border-white/30
+         active:scale-95
+         disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100;
+  z-index: 5;
+  flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.navArrow:disabled {
+  @apply hover:bg-white/10;
+}
+
+.navArrowLeft {
+  margin-left: -0.5rem;
+}
+
+.navArrowRight {
+  margin-right: -0.5rem;
+}
+
+/* Share button - redesigned */
+.shareButton {
+  @apply absolute top-4 right-4 w-11 h-11 rounded-full
+         bg-white/15 backdrop-blur-md border border-white/30
+         text-white
+         flex items-center justify-center
+         cursor-pointer transition-all duration-300
+         hover:bg-white/25 hover:scale-105 hover:border-white/40
+         active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   z-index: 10;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.shareButton svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.shareButtonLoading {
+  @apply flex items-center justify-center;
+}
+
+.spinner {
+  @apply w-5 h-5 border-2 border-white/30 border-t-white rounded-full;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .slide {
@@ -45,6 +103,13 @@
   aspect-ratio: 9 / 16;
   max-height: 100%;
   animation: slideIn 0.3s ease-out;
+  opacity: 1;
+  isolation: isolate;
+}
+
+.exportMode.slide {
+  opacity: 1 !important;
+  isolation: isolate !important;
 }
 
 @keyframes slideIn {
@@ -58,14 +123,39 @@
   }
 }
 
+/* Export mode: disable all animations for html2canvas */
+.exportMode .slideIcon {
+  animation: none !important;
+}
+
+.exportMode .slideValue {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+.exportMode * {
+  animation: none !important;
+  transition: none !important;
+}
+
 .slideContent {
   @apply absolute inset-0 flex flex-col items-center justify-center
-         text-white text-center p-8;
+         text-white text-center p-10;
+  /* Enhanced shadow for better text contrast in exports */
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.2);
+  gap: 0;
+  opacity: 1;
+}
+
+.exportMode .slideContent {
+  opacity: 1 !important;
 }
 
 .slideIcon {
-  @apply text-6xl mb-5;
+  @apply text-7xl mb-5;
   animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4));
 }
 
 @keyframes float {
@@ -78,12 +168,25 @@
 }
 
 .slideTitle {
-  @apply text-base font-medium opacity-80 mb-2;
+  @apply text-lg font-bold mb-2;
+  opacity: 1;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.02em;
 }
 
 .slideValue {
-  @apply text-4xl font-bold mb-3;
+  @apply font-bold;
+  font-size: 3rem;
   animation: popIn 0.4s ease-out 0.1s both;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6), 0 2px 12px rgba(0, 0, 0, 0.4);
+  line-height: 1.1;
+  word-break: break-word;
+  max-width: 90%;
+  margin-bottom: 20px;
+  padding-bottom: 4px;
 }
 
 @keyframes popIn {
@@ -98,29 +201,49 @@
 }
 
 .slideSubtitle {
-  @apply text-sm opacity-70 mb-2;
+  @apply text-base;
+  opacity: 0.98;
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  margin-bottom: 0;
 }
 
 .slideDetail {
-  @apply text-xs opacity-50 mt-3 bg-white/10 px-4 py-2 rounded-full;
+  @apply mt-4;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.02em;
 }
 
 .watermark {
   @apply absolute bottom-5 left-0 right-0 text-center
-         text-xs opacity-40 font-medium;
+         text-xs font-medium;
+  opacity: 0.7;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* Navigation hints */
 .navHints {
-  @apply flex justify-between items-center px-6 py-2 text-white/40 text-xs;
+  @apply flex justify-between items-center px-6 py-2 text-white/60 text-xs gap-4;
 }
 
 .navHint {
-  @apply text-xs;
+  @apply text-xs flex items-center gap-2 font-medium;
+}
+
+.kbd {
+  @apply px-2 py-1 rounded bg-white/10 border border-white/20 font-mono text-[10px]
+         min-w-[24px] text-center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .slideCounter {
-  @apply font-medium text-white/60;
+  @apply font-semibold text-white/80 text-sm;
 }
 
 /* Action buttons */
@@ -129,9 +252,15 @@
 }
 
 .exitButton {
-  @apply px-6 bg-white/10 text-white text-sm font-medium py-2.5 rounded-lg
-         border border-white/10 transition-all duration-200
-         hover:bg-white/15 active:scale-95;
+  @apply px-5 bg-white/10 text-white text-sm font-medium py-2.5 rounded-xl
+         border border-white/20 transition-all duration-300
+         hover:bg-white/15 hover:border-white/30 active:scale-95
+         flex items-center gap-2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.exitButton svg {
+  opacity: 0.8;
 }
 
 /* Responsive adjustments */
@@ -142,20 +271,75 @@
   }
 
   .slideValue {
-    @apply text-3xl;
+    @apply text-5xl;
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+    line-height: 1.1;
+  }
+
+  .slideTitle {
+    @apply text-base mb-2;
+  }
+
+  .slideSubtitle {
+    @apply text-sm;
+    margin-bottom: 0;
   }
 
   .slideIcon {
-    @apply text-5xl;
+    @apply text-6xl mb-4;
   }
 
   .slideContent {
-    @apply p-6;
+    @apply p-8;
+  }
+
+  .slideDetail {
+    font-size: 13px;
+    margin-top: 0.75rem;
+  }
+
+  .navArrow {
+    @apply w-10 h-10;
+  }
+
+  .navArrow svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .navArrowLeft {
+    margin-left: -1rem;
+  }
+
+  .navArrowRight {
+    margin-right: -1rem;
+  }
+
+  .slideContainer {
+    @apply gap-2 px-2;
+  }
+
+  .navHints {
+    @apply px-4;
+  }
+
+  .navHint {
+    @apply text-[10px];
+  }
+
+  .kbd {
+    @apply hidden;
   }
 }
 
 /* Touch feedback */
-.slideContainer:active .slide {
-  transform: scale(0.98);
+.slide {
+  transition: transform 0.15s ease-out;
+}
+
+.navArrow:active,
+.shareButton:active,
+.exitButton:active {
   transition: transform 0.1s ease;
 }

@@ -1,5 +1,23 @@
 .landing {
   @apply min-h-screen flex flex-col bg-primary-50 p-6;
+  position: relative;
+}
+
+.githubButton {
+  @apply flex items-center gap-2.5 px-5 py-3
+         bg-primary-900 text-white rounded-xl
+         text-sm font-semibold
+         hover:bg-primary-800 transition-all duration-200
+         hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.githubButton svg {
+  flex-shrink: 0;
 }
 
 .header {
@@ -19,17 +37,20 @@
 }
 
 .footer {
-  @apply py-8 px-5 flex justify-center;
+  @apply py-12 px-5 flex flex-col items-center gap-8;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .privacyBadge {
   @apply flex items-center gap-4 bg-white
-         px-5 py-4 rounded-2xl border border-primary-200
-         text-primary-600 max-w-md;
+         px-6 py-5 rounded-2xl border border-primary-200
+         text-primary-600 max-w-lg shadow-sm;
 }
 
 .badgeIcon {
-  @apply text-2xl;
+  @apply text-3xl;
 }
 
 .badgeContent {
@@ -37,11 +58,65 @@
 }
 
 .badgeTitle {
-  @apply block text-sm font-semibold mb-0.5 text-primary-800;
+  @apply block text-base font-bold mb-1 text-primary-900;
 }
 
 .badgeText {
-  @apply m-0 text-sm text-primary-500;
+  @apply m-0 text-sm text-primary-600;
+}
+
+.howToSection {
+  @apply bg-white rounded-2xl border border-primary-200 px-6 py-5 max-w-2xl shadow-sm;
+}
+
+.howToTitle {
+  @apply m-0 mb-4 text-lg font-bold text-primary-900;
+  text-align: center;
+}
+
+.howToSteps {
+  @apply m-0 pl-5 space-y-2.5;
+  list-style: decimal;
+}
+
+.howToStep {
+  @apply text-sm text-primary-700 leading-relaxed;
+  padding-left: 0.5rem;
+}
+
+.howToLink {
+  @apply text-primary-600 font-semibold
+         hover:text-primary-800 transition-colors duration-200
+         underline decoration-primary-300 hover:decoration-primary-500;
+}
+
+.disclaimers {
+  @apply flex flex-col items-center gap-3 max-w-2xl px-4;
+}
+
+.disclaimer {
+  @apply m-0 text-sm text-primary-500 flex items-center gap-2.5;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.disclaimerIcon {
+  @apply text-base;
+  flex-shrink: 0;
+}
+
+.attribution {
+  @apply flex flex-col items-center pt-6 border-t border-primary-200 w-full max-w-2xl;
+}
+
+.builtBy {
+  @apply m-0 text-base text-primary-600 font-medium;
+}
+
+.authorLink {
+  @apply text-primary-700 font-bold
+         hover:text-primary-900 transition-colors duration-200
+         no-underline hover:underline decoration-2 decoration-primary-400;
 }
 
 @media (max-width: 768px) {
@@ -53,11 +128,75 @@
     @apply text-base;
   }
 
+  .githubButton {
+    @apply text-xs px-3 py-2 gap-2;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .githubButton svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .footer {
+    @apply py-8 gap-6;
+  }
+
   .privacyBadge {
-    @apply flex-col text-center;
+    @apply flex-col text-center gap-3 px-5 py-4;
+  }
+
+  .badgeIcon {
+    @apply text-2xl;
   }
 
   .badgeContent {
     @apply text-center;
+  }
+
+  .badgeTitle {
+    @apply text-sm;
+  }
+
+  .badgeText {
+    @apply text-xs;
+  }
+
+  .howToSection {
+    @apply px-5 py-4;
+  }
+
+  .howToTitle {
+    @apply text-base mb-3;
+  }
+
+  .howToSteps {
+    @apply pl-4 space-y-2;
+  }
+
+  .howToStep {
+    @apply text-xs;
+    padding-left: 0.25rem;
+  }
+
+  .disclaimers {
+    @apply gap-2.5;
+  }
+
+  .disclaimer {
+    @apply text-xs;
+  }
+
+  .disclaimerIcon {
+    @apply text-sm;
+  }
+
+  .attribution {
+    @apply pt-4;
+  }
+
+  .builtBy {
+    @apply text-sm;
   }
 }

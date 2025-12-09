@@ -1,10 +1,11 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import { useDataStore } from '../stores/dataStore';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { convertToINR } from '../utils/categoryUtils';
 import { filterTransactionsByYear, filterActivitiesByYear } from '../utils/dateUtils';
 import NoDataRedirect from '../components/NoDataRedirect';
+import { animate as anime } from 'animejs';
 import styles from './Wrapped.module.css';
 
 interface SlideData {
@@ -70,7 +71,7 @@ export default function Wrapped() {
         value: selectedYear === 'all' ? 'All Time' : selectedYear,
         subtitle: 'Wrapped',
         icon: '🎉',
-        gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        gradient: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', // Hot pink to purple
       },
       // Total spent
       {
@@ -79,7 +80,7 @@ export default function Wrapped() {
         value: `₹${formatAmount(totalSpent)}`,
         subtitle: `across ${filteredActivities.length + filteredTransactions.length} transactions`,
         icon: '💸',
-        gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        gradient: 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', // Amber to red
       },
     ];
 
@@ -95,7 +96,7 @@ export default function Wrapped() {
             value: `₹${formatAmount(data.totalSent.value)}`,
             subtitle: `sent to friends & family`,
             icon: data.flowDirection === 'giver' ? '🎁' : data.flowDirection === 'receiver' ? '🧲' : '⚖️',
-            gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            gradient: 'linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)', // Cyan to blue
             detail: `Received ₹${formatAmount(data.totalReceived.value)} back`,
           });
           break;
@@ -108,7 +109,7 @@ export default function Wrapped() {
             value: data.topCategory,
             subtitle: `₹${formatAmount(data.topCategoryAmount.value)} spent`,
             icon: getCategoryIcon(data.topCategory),
-            gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            gradient: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', // Amber to orange
             detail: `${data.topCategoryCount} transactions`,
           });
           break;
@@ -121,7 +122,7 @@ export default function Wrapped() {
             value: `${data.peakDay}s`,
             subtitle: `at ${data.peakHour}:00`,
             icon: data.nightOwlScore > 30 ? '🦉' : '☀️',
-            gradient: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+            gradient: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)', // Purple to pink
             detail: data.nightOwlScore > 30 ? `${data.nightOwlScore}% payments after 10pm` : undefined,
           });
           break;
@@ -135,7 +136,7 @@ export default function Wrapped() {
               value: data.mostFrequentPartner,
               subtitle: `₹${formatAmount(data.totalAmount.value)}`,
               icon: '👤',
-              gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+              gradient: 'linear-gradient(135deg, #10B981 0%, #06B6D4 100%)', // Green to cyan
               detail: `${data.transactionCount} transactions`,
             });
           }
@@ -150,7 +151,175 @@ export default function Wrapped() {
             value: date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }),
             subtitle: `₹${formatAmount(data.amount)} spent`,
             icon: '📅',
-            gradient: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+            gradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)', // Red to dark red
+          });
+          break;
+        }
+        case 'domain_collector': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'domain_collector',
+            title: 'The Domain Collector',
+            value: `${data.totalDomains}`,
+            subtitle: `domains purchased`,
+            icon: '🌐',
+            gradient: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)', // Blue to purple
+            detail: data.mostRenewed ? `Most renewed: ${data.mostRenewed}` : undefined,
+          });
+          break;
+        }
+        case 'group_champion': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'group_champion',
+            title: 'Group Expense Champion',
+            value: `${data.reliabilityScore}%`,
+            subtitle: 'reliability score',
+            icon: '🏆',
+            gradient: 'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)', // Dark amber to amber (darker for contrast)
+            detail: `Paid ${data.paidCount}/${data.totalCount} splits`,
+          });
+          break;
+        }
+        case 'voucher_hoarder': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'voucher_hoarder',
+            title: 'Voucher Collector',
+            value: `${data.totalVouchers}`,
+            subtitle: 'vouchers earned',
+            icon: '🎁',
+            gradient: 'linear-gradient(135deg, #DB2777 0%, #E11D48 100%)', // Darker pink to darker rose
+            detail: data.expired > 0 ? `${data.expired} expired (${data.wastePercentage}%)` : undefined,
+          });
+          break;
+        }
+        case 'spending_timeline': {
+          const data = insight.data as any;
+          const firstDate = new Date(data.firstDate);
+          generatedSlides.push({
+            id: 'spending_timeline',
+            title: 'GPay Journey',
+            value: data.yearsSince,
+            subtitle: 'years of transactions',
+            icon: '📅',
+            gradient: 'linear-gradient(135deg, #0891B2 0%, #059669 100%)', // Darker cyan to darker green
+            detail: `Since ${firstDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}`,
+          });
+          break;
+        }
+        case 'split_partner': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'split_partner',
+            title: 'Your Split Partner',
+            value: data.partnerName,
+            subtitle: `${data.splitCount} splits together`,
+            icon: '🤝',
+            gradient: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)', // Purple to indigo
+          });
+          break;
+        }
+        case 'reward_hunter': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'reward_hunter',
+            title: 'Cashback Hunter',
+            value: `₹${formatAmount(data.totalRewards)}`,
+            subtitle: 'cashback earned',
+            icon: '🎯',
+            gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', // Green to dark green
+            detail: `${data.rewardCount} rewards`,
+          });
+          break;
+        }
+        case 'responsible_one': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'responsible_one',
+            title: 'The Responsible One',
+            value: `${data.createdCount}`,
+            subtitle: 'group expenses created',
+            icon: '👨‍👩‍👧‍👦',
+            gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', // Amber to dark amber
+            detail: `Total: ₹${formatAmount(data.totalAmount)}`,
+          });
+          break;
+        }
+        case 'money_network': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'money_network',
+            title: 'Your Money Network',
+            value: `${data.peopleCount}`,
+            subtitle: 'people in your circle',
+            icon: '👥',
+            gradient: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)', // Indigo to purple
+            detail: `${data.groupCount} groups`,
+          });
+          break;
+        }
+        case 'bulk_payment': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'bulk_payment',
+            title: 'Payment Velocity',
+            value: `${data.maxTransactionsInDay}`,
+            subtitle: 'transactions in one day',
+            icon: '⚡',
+            gradient: 'linear-gradient(135deg, #D97706 0%, #DC2626 100%)', // Dark amber to red (more vibrant)
+            detail: `${data.maxTransactionsInHour} in one hour`,
+          });
+          break;
+        }
+        case 'payment_streak': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'payment_streak',
+            title: 'Payment Streak',
+            value: `${data.longestStreak} days`,
+            subtitle: 'longest streak',
+            icon: '🔥',
+            gradient: 'linear-gradient(135deg, #F97316 0%, #EF4444 100%)', // Orange to red
+          });
+          break;
+        }
+        case 'midnight_shopper': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'midnight_shopper',
+            title: 'Night Owl',
+            value: `${data.lateNightCount}`,
+            subtitle: 'late night payments',
+            icon: '🌙',
+            gradient: 'linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)', // Indigo to blue
+            detail: `Latest: ${data.latestHour}:00`,
+          });
+          break;
+        }
+        case 'smallest_payment': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'smallest_payment',
+            title: 'Every Rupee Counts',
+            value: `₹${data.amount.value}`,
+            subtitle: 'smallest payment',
+            icon: '🪙',
+            gradient: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)', // Green to teal
+            detail: data.description,
+          });
+          break;
+        }
+        case 'round_number_obsession': {
+          const data = insight.data as any;
+          generatedSlides.push({
+            id: 'round_number',
+            title: 'Round Number Lover',
+            value: `${data.roundPercentage}%`,
+            subtitle: 'payments in round numbers',
+            icon: '💯',
+            gradient: 'linear-gradient(135deg, #EC4899 0%, #D946EF 100%)', // Pink to fuchsia
+            detail: `Favorite: ₹${data.favoriteRoundNumber}`,
           });
           break;
         }
@@ -164,7 +333,7 @@ export default function Wrapped() {
       value: 'GPay Wrapped',
       subtitle: selectedYear === 'all' ? 'All Time' : selectedYear,
       icon: '✨',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      gradient: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', // Hot pink to purple (same as intro)
       detail: 'Share with friends!',
     });
 
@@ -172,23 +341,103 @@ export default function Wrapped() {
   }, [parsedData, insights, selectedYear]);
 
   const nextSlide = useCallback(() => {
-    setCurrentSlide(prev => (prev + 1) % slides.length);
+    setCurrentSlide(prev => {
+      const next = (prev + 1) % slides.length;
+      // Animate transition
+      if (slideRef.current) {
+        anime(slideRef.current, {
+          scale: [0.95, 1],
+          opacity: [0, 1],
+          duration: 300,
+          ease: 'out(3)',
+        });
+      }
+      return next;
+    });
   }, [slides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide(prev => {
+      const previous = (prev - 1 + slides.length) % slides.length;
+      // Animate transition
+      if (slideRef.current) {
+        anime(slideRef.current, {
+          scale: [0.95, 1],
+          opacity: [0, 1],
+          duration: 300,
+          ease: 'out(3)',
+        });
+      }
+      return previous;
+    });
   }, [slides.length]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        prevSlide();
+      } else if (e.key === 'ArrowRight') {
+        nextSlide();
+      } else if (e.key === 'Escape') {
+        navigate('/story');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [nextSlide, prevSlide, navigate]);
+
+  // Entrance animation
+  useEffect(() => {
+    if (slideRef.current) {
+      anime(slideRef.current, {
+        scale: [0.9, 1],
+        opacity: [0, 1],
+        duration: 500,
+        ease: 'out(3)',
+      });
+    }
+  }, [currentSlide]);
 
   const shareSlide = useCallback(async () => {
     if (!slideRef.current) return;
 
     setIsSharing(true);
     try {
+      // Disable animations for export by adding a class
+      slideRef.current.classList.add(styles.exportMode);
+
+      // Force a repaint to ensure gradient is rendered
+      void slideRef.current.offsetHeight;
+
+      // Wait for layout to stabilize and gradient to render
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       const canvas = await html2canvas(slideRef.current, {
         backgroundColor: null,
-        scale: 2,
+        scale: 3,
         useCORS: true,
+        logging: true, // Enable logging to debug
+        allowTaint: false,
+        imageTimeout: 0,
+        windowWidth: slideRef.current.scrollWidth,
+        windowHeight: slideRef.current.scrollHeight,
+        onclone: (clonedDoc) => {
+          // Ensure the cloned element has proper styling
+          const clonedSlide = clonedDoc.querySelector(`.${styles.slide}`) as HTMLElement;
+          if (clonedSlide && slideRef.current) {
+            // Copy the computed background from the original element
+            const computedStyle = window.getComputedStyle(slideRef.current);
+            clonedSlide.style.background = computedStyle.background;
+            clonedSlide.style.opacity = '1';
+            clonedSlide.style.isolation = 'isolate';
+          }
+        },
       });
+
+      // Re-enable animations after capture
+      slideRef.current.classList.remove(styles.exportMode);
 
       // Convert to blob and share or download
       canvas.toBlob(async (blob) => {
@@ -237,6 +486,11 @@ export default function Wrapped() {
 
   return (
     <div className={styles.wrapped}>
+      {/* Header */}
+      <div className={styles.header}>
+        <h1 className={styles.headerTitle}>GPay Wrapped {selectedYear === 'all' ? 'All Time' : selectedYear}</h1>
+      </div>
+
       {/* Progress bar */}
       <div className={styles.progressBar}>
         {slides.map((_, index) => (
@@ -249,18 +503,19 @@ export default function Wrapped() {
       </div>
 
       {/* Main slide area */}
-      <div
-        className={styles.slideContainer}
-        onClick={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          if (x < rect.width / 3) {
-            prevSlide();
-          } else if (x > (rect.width * 2) / 3) {
-            nextSlide();
-          }
-        }}
-      >
+      <div className={styles.slideContainer}>
+        {/* Left navigation arrow */}
+        <button
+          className={`${styles.navArrow} ${styles.navArrowLeft}`}
+          onClick={prevSlide}
+          aria-label="Previous slide"
+          disabled={currentSlide === 0}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+
         <div className={styles.slideWrapper}>
           <div
             ref={slideRef}
@@ -273,29 +528,57 @@ export default function Wrapped() {
               <div className={styles.slideValue}>{slide.value}</div>
               <p className={styles.slideSubtitle}>{slide.subtitle}</p>
               {slide.detail && <p className={styles.slideDetail}>{slide.detail}</p>}
-              <div className={styles.watermark}>GPay Wrapped {selectedYear}</div>
+              <div className={styles.watermark}>gpay-wrapped.pages.dev</div>
             </div>
           </div>
-          {/* Share icon overlay */}
+
+          {/* Share button overlay - redesigned */}
           <button
-            className={styles.shareIcon}
+            className={styles.shareButton}
             onClick={(e) => {
               e.stopPropagation();
               shareSlide();
             }}
             disabled={isSharing}
-            aria-label="Share slide"
+            aria-label="Share or download slide"
+            title="Share or download"
           >
-            {isSharing ? '...' : '↗'}
+            {isSharing ? (
+              <div className={styles.shareButtonLoading}>
+                <div className={styles.spinner}></div>
+              </div>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                <polyline points="16 6 12 2 8 6"></polyline>
+                <line x1="12" y1="2" x2="12" y2="15"></line>
+              </svg>
+            )}
           </button>
         </div>
+
+        {/* Right navigation arrow */}
+        <button
+          className={`${styles.navArrow} ${styles.navArrowRight}`}
+          onClick={nextSlide}
+          aria-label="Next slide"
+          disabled={currentSlide === slides.length - 1}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
       </div>
 
-      {/* Navigation hints */}
+      {/* Navigation hints with counter */}
       <div className={styles.navHints}>
-        <span className={styles.navHint}>← Tap left</span>
+        <span className={styles.navHint}>
+          <kbd className={styles.kbd}>←</kbd> Previous
+        </span>
         <span className={styles.slideCounter}>{currentSlide + 1} / {slides.length}</span>
-        <span className={styles.navHint}>Tap right →</span>
+        <span className={styles.navHint}>
+          Next <kbd className={styles.kbd}>→</kbd>
+        </span>
       </div>
 
       {/* Action buttons */}
@@ -304,6 +587,10 @@ export default function Wrapped() {
           className={styles.exitButton}
           onClick={() => navigate('/story')}
         >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
           Exit
         </button>
       </div>
