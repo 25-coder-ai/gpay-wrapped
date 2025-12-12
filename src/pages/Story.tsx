@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useRef, useCallback } from 'react';
 import { useDataStore } from '../stores/dataStore';
 import { useNavigate } from 'react-router-dom';
-import { convertToINR } from '../utils/categoryUtils';
+import { convertToINR, TransactionCategory, categorizeTransaction } from '../utils/categoryUtils';
 import {
   filterTransactionsByYear,
   filterActivitiesByYear,
@@ -10,6 +10,8 @@ import {
   filterVouchersByYear,
 } from '../utils/dateUtils';
 import NoDataRedirect from '../components/NoDataRedirect';
+import Footer from '../components/Footer';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import { animate as anime } from 'animejs';
 import styles from './Story.module.css';
 
@@ -20,7 +22,7 @@ export default function Story() {
   const heroRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const insightsRef = useRef<HTMLDivElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
+  const categoriesRef = useRef<HTMLDivElement>(null);
 
   // Filter ALL data by selected year
   const filteredData = useMemo(() => {
@@ -69,6 +71,65 @@ export default function Story() {
     }
     return Math.round(amount).toLocaleString();
   }, []);
+
+  // Category icons and colors
+  const CATEGORY_ICONS: Record<TransactionCategory, string> = {
+    Food: '🍕',
+    Groceries: '🛒',
+    Clothing: '👕',
+    Entertainment: '🎬',
+    'E-commerce': '🛍️',
+    'Travel & Transport': '🚗',
+    'Utilities & Bills': '💡',
+    'Bills & Utilities': '💡',
+    Healthcare: '🏥',
+    Education: '📚',
+    Investments: '📈',
+    'Investment & Finance': '📈',
+    Transfers: '💸',
+    'Bank Transfers': '🏦',
+    'Transfers & Payments': '🏦',
+    'Services & Miscellaneous': '📦',
+    Others: '📦',
+  };
+
+  // Calculate category data
+  const categoryData = useMemo(() => {
+    if (!filteredData) return [];
+
+    const allItemsWithCategory: { category: TransactionCategory; amount: number }[] = [
+      ...filteredData.transactions.map(t => ({
+        category: categorizeTransaction(t.description),
+        amount: convertToINR(t.amount),
+      })),
+      ...filteredData.activities
+        .filter(a => a.amount && (a.transactionType === 'sent' || a.transactionType === 'paid'))
+        .map(a => ({
+          category: categorizeTransaction(a.title),
+          amount: convertToINR(a.amount!),
+        })),
+    ];
+
+    const categoryMap = new Map<TransactionCategory, { total: number; count: number }>();
+    allItemsWithCategory.forEach(item => {
+      const existing = categoryMap.get(item.category) || { total: 0, count: 0 };
+      existing.total += item.amount;
+      existing.count++;
+      categoryMap.set(item.category, existing);
+    });
+
+    const grandTotal = allItemsWithCategory.reduce((sum, item) => sum + item.amount, 0);
+
+    return Array.from(categoryMap.entries())
+      .map(([category, stats]) => ({
+        category,
+        amount: stats.total,
+        count: stats.count,
+        percentage: grandTotal > 0 ? (stats.total / grandTotal) * 100 : 0,
+      }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 6); // Top 6 categories for cleaner layout
+  }, [filteredData]);
 
   // Animate on mount
   useEffect(() => {
@@ -149,13 +210,13 @@ export default function Story() {
       });
     }
 
-    // Actions animation
-    if (actionsRef.current) {
-      const buttons = Array.from(actionsRef.current.querySelectorAll('button'));
-      buttons.forEach((button, index) => {
-        anime(button, {
+    // Categories animation
+    if (categoriesRef.current) {
+      const categoryCards = Array.from(categoriesRef.current.querySelectorAll(`.${styles.categoryCard}`));
+      categoryCards.forEach((card, index) => {
+        anime(card, {
           opacity: [0, 1],
-          y: [20, 0],
+          y: [30, 0],
           delay: 2000 + (index * 100),
           duration: 600,
           ease: 'out(3)',
@@ -173,12 +234,39 @@ export default function Story() {
 
   return (
     <div className={styles.story} ref={containerRef}>
+      {/* Sticky Navigation Header */}
+      <nav className={styles.stickyNav}>
+        <div className={styles.navContent}>
+          <div className={styles.navBrand}>
+            <span className={styles.navLogo}>💸</span>
+            <span className={styles.navTitle}>GPay Wrapped</span>
+          </div>
+          <div className={styles.navActions}>
+            <div className={styles.navLinks}>
+              <button onClick={() => navigate('/insights')} className={styles.navLink}>
+                <span className={styles.navIcon}>💡</span>
+                <span>Insights</span>
+              </button>
+              <button onClick={() => navigate('/story')} className={styles.navLink}>
+                <span className={styles.navIcon}>✨</span>
+                <span>Story</span>
+              </button>
+              <button onClick={() => navigate('/explore-data')} className={styles.navLink}>
+                <span className={styles.navIcon}>🔍</span>
+                <span>Explore</span>
+              </button>
+            </div>
+            <ThemeSwitcher />
+          </div>
+        </div>
+      </nav>
+
       <div className={styles.container}>
         {/* Hero Section */}
         <div className={styles.hero} ref={heroRef}>
           <div className={styles.heroIcon}>💸</div>
           <h1 className={styles.heroTitle}>
-            Your GPay Story
+            Your GPay Wrapped
           </h1>
           <div className={styles.heroYear}>
             {selectedYear === 'all' ? 'All Time' : selectedYear}
@@ -290,28 +378,49 @@ export default function Story() {
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className={styles.actionButtons} ref={actionsRef}>
-          <button onClick={() => navigate('/wrapped')} className={`${styles.actionButton} ${styles.wrapped}`}>
-            <span className={styles.buttonIcon}>🎬</span>
-            <span className={styles.buttonText}>View Your Wrapped</span>
-          </button>
+        {/* Categories Section */}
+        {categoryData.length > 0 && (
+          <div className={styles.categoriesSection} ref={categoriesRef}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.titleIcon}>🏷️</span>
+              Top Categories
+            </h2>
+            <div className={styles.categoryGrid}>
+              {categoryData.map((item) => (
+                <div key={item.category} className={styles.categoryCard}>
+                  <div className={styles.categoryCardHeader}>
+                    <span className={styles.categoryCardIcon}>
+                      {CATEGORY_ICONS[item.category]}
+                    </span>
+                    <span className={styles.categoryCardName}>{item.category}</span>
+                  </div>
+                  <div className={styles.categoryCardAmount}>
+                    ₹{formatAmount(item.amount)}
+                  </div>
+                  <div className={styles.categoryCardFooter}>
+                    <span className={styles.categoryCardCount}>
+                      {item.count} transaction{item.count !== 1 ? 's' : ''}
+                    </span>
+                    <span className={styles.categoryCardPercentage}>
+                      {item.percentage.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className={styles.exploreSection}>
+              <button onClick={() => navigate('/explore-data')} className={styles.exploreButton}>
+                <span className={styles.exploreIcon}>🔍</span>
+                <span>View All Transactions</span>
+                <span className={styles.exploreArrow}>→</span>
+              </button>
+            </div>
+          </div>
+        )}
 
-          <button onClick={() => navigate('/categories')} className={`${styles.actionButton} ${styles.categories}`}>
-            <span className={styles.buttonIcon}>📊</span>
-            <span className={styles.buttonText}>Spending Categories</span>
-          </button>
+        {/* Footer */}
+        <Footer />
 
-          <button onClick={() => navigate('/data')} className={`${styles.actionButton} ${styles.data}`}>
-            <span className={styles.buttonIcon}>📋</span>
-            <span className={styles.buttonText}>View All Data</span>
-          </button>
-
-          <button onClick={() => navigate('/')} className={`${styles.actionButton} ${styles.upload}`}>
-            <span className={styles.buttonIcon}>📁</span>
-            <span className={styles.buttonText}>Upload Another File</span>
-          </button>
-        </div>
       </div>
 
       {/* Floating particles background */}

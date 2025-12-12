@@ -5,6 +5,7 @@ import Story from './pages/Story';
 import Categories from './pages/Categories';
 import Wrapped from './pages/Wrapped';
 import DataTable from './pages/DataTable';
+import About from './pages/About';
 import './App.css';
 
 function App() {
@@ -13,10 +14,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/processing" element={<Processing />} />
-        <Route path="/story" element={<Story />} />
+        <Route path="/insights" element={<Story />} />
         <Route path="/categories" element={<Categories />} />
-        <Route path="/wrapped" element={<Wrapped />} />
-        <Route path="/data" element={<DataTable />} />
+        <Route path="/story" element={<Wrapped />} />
+        <Route path="/explore-data" element={<DataTable />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </Router>
   );

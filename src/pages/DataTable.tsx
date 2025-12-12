@@ -15,11 +15,14 @@ import {
 import { convertToINR } from '../utils/categoryUtils';
 import Tooltip from '../components/Tooltip';
 import NoDataRedirect from '../components/NoDataRedirect';
+import Footer from '../components/Footer';
+import MultiSelect from '../components/MultiSelect';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import styles from './DataTable.module.css';
 
 interface TableRow {
   date: Date;
-  type: 'activity' | 'transaction';
+  type: 'activity' | 'transaction' | 'group_expense';
   description: string;
   amount: number;
   currency: string;
@@ -27,18 +30,29 @@ interface TableRow {
   status?: string;
   recipient?: string;
   direction?: 'sent' | 'received' | 'paid' | 'request' | 'other';
+  settlementStatus?: 'PAID_RECEIVED' | 'UNPAID';
+  groupName?: string;
+  expenseTitle?: string;
+  payer?: string;
+  creator?: string;
 }
+
+type ViewType = 'activity' | 'transaction' | 'group_expense';
 
 export default function DataTable() {
   const navigate = useNavigate();
   const { parsedData } = useDataStore();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [activeView, setActiveView] = useState<ViewType>('activity');
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [yearFilter, setYearFilter] = useState<string>('2025');
   const [monthFilter, setMonthFilter] = useState<string>('all');
-  const [merchantFilter, setMerchantFilter] = useState<string>('all');
+  const [merchantFilter, setMerchantFilter] = useState<string[]>([]);
+  const [settlementFilter, setSettlementFilter] = useState<string[]>([]);
+  const [payerFilter, setPayerFilter] = useState<string[]>([]);
+  const [directionFilter, setDirectionFilter] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
 
   // Combine all data into a single table
   const tableData = useMemo((): TableRow[] => {
@@ -82,12 +96,50 @@ export default function DataTable() {
       });
     });
 
+    // Add group expenses (each item as a separate row)
+    parsedData.groupExpenses.forEach(expense => {
+      expense.items.forEach(item => {
+        const displayAmount = convertToINR(item.amount);
+
+        // Build description: handle empty titles gracefully
+        let description = '';
+        if (expense.title && expense.groupName) {
+          description = `${expense.title} - ${expense.groupName}`;
+        } else if (expense.groupName) {
+          description = expense.groupName;
+        } else if (expense.title) {
+          description = expense.title;
+        } else {
+          description = 'Group Expense';
+        }
+
+        rows.push({
+          date: expense.creationTime,
+          type: 'group_expense',
+          description,
+          amount: displayAmount,
+          currency: item.amount.currency,
+          status: expense.state,
+          settlementStatus: item.state,
+          groupName: expense.groupName,
+          expenseTitle: expense.title,
+          direction: 'paid',
+          payer: item.payer,
+          creator: expense.creator,
+        });
+      });
+    });
+
     return rows.sort((a, b) => b.date.getTime() - a.date.getTime());
   }, [parsedData]);
 
   // Get unique categories for filter
   const categories = useMemo(() => {
-    const cats = new Set(tableData.map(row => row.category).filter(Boolean));
+    const cats = new Set(
+      tableData
+        .map(row => row.category)
+        .filter((cat): cat is string => Boolean(cat))
+    );
     return Array.from(cats).sort();
   }, [tableData]);
 
@@ -114,9 +166,12 @@ export default function DataTable() {
     { value: '11', label: 'December' },
   ];
 
-  // Filter data based on selected filters
+  // Filter data based on selected filters and active view
   const filteredData = useMemo(() => {
     let filtered = tableData;
+
+    // First filter by active view
+    filtered = filtered.filter(row => row.type === activeView);
 
     // Year filter
     if (yearFilter === 'lifetime') {
@@ -132,32 +187,50 @@ export default function DataTable() {
       filtered = filtered.filter(row => row.date.getMonth() === month);
     }
 
-    // Category filter
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(row => row.category === categoryFilter);
+    // Category filter (multi-select)
+    if (categoryFilter.length > 0) {
+      filtered = filtered.filter(row => row.category && categoryFilter.includes(row.category));
     }
 
-    // Type filter
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter(row => row.type === typeFilter);
+    // Direction filter (for activity view, multi-select)
+    if (directionFilter.length > 0 && activeView === 'activity') {
+      filtered = filtered.filter(row => row.direction && directionFilter.includes(row.direction));
     }
 
-    // Merchant filter
-    if (merchantFilter !== 'all') {
+    // Status filter (for transaction view, multi-select)
+    if (statusFilter.length > 0 && activeView === 'transaction') {
+      filtered = filtered.filter(row => row.status && statusFilter.includes(row.status));
+    }
+
+    // Merchant filter (multi-select)
+    if (merchantFilter.length > 0) {
       filtered = filtered.filter(row => {
         // Extract merchant name from the description which already contains "To X" or "From X"
         const merchantName = row.description.replace(/^(To |From )/i, '').trim();
-        return merchantName === merchantFilter;
+        return merchantFilter.includes(merchantName);
       });
     }
 
+    // Settlement status filter (only for group expenses view, multi-select)
+    if (settlementFilter.length > 0 && activeView === 'group_expense') {
+      filtered = filtered.filter(row => row.settlementStatus && settlementFilter.includes(row.settlementStatus));
+    }
+
+    // Payer filter (only for group expenses view, multi-select)
+    if (payerFilter.length > 0 && activeView === 'group_expense') {
+      filtered = filtered.filter(row => row.payer && payerFilter.includes(row.payer));
+    }
+
     return filtered;
-  }, [tableData, categoryFilter, typeFilter, yearFilter, monthFilter, merchantFilter]);
+  }, [tableData, activeView, categoryFilter, yearFilter, monthFilter, merchantFilter, settlementFilter, payerFilter, directionFilter, statusFilter]);
 
   // Get unique merchants for filter (based on currently filtered data, excluding merchant filter itself)
   const merchants = useMemo(() => {
-    // Filter data by year, month, category, and type (but NOT merchant filter)
+    // Filter data by year, month, category, and active view (but NOT merchant filter)
     let dataForMerchants = tableData;
+
+    // Filter by active view
+    dataForMerchants = dataForMerchants.filter(row => row.type === activeView);
 
     // Year filter
     if (yearFilter === 'lifetime') {
@@ -174,13 +247,8 @@ export default function DataTable() {
     }
 
     // Category filter
-    if (categoryFilter !== 'all') {
-      dataForMerchants = dataForMerchants.filter(row => row.category === categoryFilter);
-    }
-
-    // Type filter
-    if (typeFilter !== 'all') {
-      dataForMerchants = dataForMerchants.filter(row => row.type === typeFilter);
+    if (categoryFilter.length > 0) {
+      dataForMerchants = dataForMerchants.filter(row => row.category && categoryFilter.includes(row.category));
     }
 
     // Extract unique merchants from the filtered data
@@ -207,7 +275,18 @@ export default function DataTable() {
     });
 
     return Array.from(merchantSet).sort();
-  }, [tableData, yearFilter, monthFilter, categoryFilter, typeFilter]);
+  }, [tableData, yearFilter, monthFilter, categoryFilter, activeView]);
+
+  // Get unique payers for filter (only from group expenses)
+  const payers = useMemo(() => {
+    const payerSet = new Set<string>();
+    tableData.forEach(row => {
+      if (row.type === 'group_expense' && row.payer) {
+        payerSet.add(row.payer);
+      }
+    });
+    return Array.from(payerSet).sort();
+  }, [tableData]);
 
   // Calculate totals with direction awareness
   const totals = useMemo(() => {
@@ -229,6 +308,39 @@ export default function DataTable() {
       average: filteredData.length > 0 ? sent / filteredData.length : 0,
     };
   }, [filteredData]);
+
+  // Define column visibility based on active view
+  const columnVisibility = useMemo(() => {
+    const visibility: Record<string, boolean> = {
+      date: true,
+      description: true,
+      amount: true,
+      category: true,
+    };
+
+    // Set visibility for other columns based on active view
+    if (activeView === 'activity') {
+      visibility.direction = true;
+      visibility.settlementStatus = false;
+      visibility.payer = false;
+      visibility.status = false;
+      visibility.type = false;
+    } else if (activeView === 'transaction') {
+      visibility.direction = false;
+      visibility.settlementStatus = false;
+      visibility.payer = false;
+      visibility.status = true;
+      visibility.type = false;
+    } else if (activeView === 'group_expense') {
+      visibility.direction = true;
+      visibility.settlementStatus = true;
+      visibility.payer = true;
+      visibility.status = false;
+      visibility.type = false;
+    }
+
+    return visibility;
+  }, [activeView]);
 
   // Define columns
   const columnHelper = createColumnHelper<TableRow>();
@@ -297,6 +409,52 @@ export default function DataTable() {
           );
         },
       }),
+      columnHelper.accessor('settlementStatus', {
+        header: 'Settlement',
+        cell: info => {
+          const status = info.getValue();
+          const row = info.row.original;
+
+          // Only show settlement status for group expenses
+          if (row.type !== 'group_expense') {
+            return <span className={styles.directionBadge}>-</span>;
+          }
+
+          if (!status) return <span className={styles.directionBadge}>-</span>;
+
+          const settlementStyles = {
+            PAID_RECEIVED: { label: '✓ Paid', className: styles.settlementPaid },
+            UNPAID: { label: '✗ Unpaid', className: styles.settlementUnpaid },
+          };
+
+          const config = settlementStyles[status];
+          return (
+            <span className={`${styles.settlementBadge} ${config.className}`}>
+              {config.label}
+            </span>
+          );
+        },
+      }),
+      columnHelper.accessor('payer', {
+        header: 'Payer',
+        cell: info => {
+          const payer = info.getValue();
+          const row = info.row.original;
+
+          // Only show payer for group expenses
+          if (row.type !== 'group_expense') {
+            return <span className={styles.directionBadge}>-</span>;
+          }
+
+          if (!payer) return <span className={styles.directionBadge}>-</span>;
+
+          return (
+            <span className={styles.payerBadge}>
+              {payer}
+            </span>
+          );
+        },
+      }),
       columnHelper.accessor('amount', {
         header: 'Amount',
         cell: info => {
@@ -349,6 +507,7 @@ export default function DataTable() {
     state: {
       sorting,
       columnFilters,
+      columnVisibility,
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -387,17 +546,93 @@ export default function DataTable() {
     return yearFilter;
   };
 
+  // Get view title
+  const getViewTitle = () => {
+    switch (activeView) {
+      case 'activity':
+        return 'Activity';
+      case 'transaction':
+        return 'Transactions';
+      case 'group_expense':
+        return 'Group Expenses';
+      default:
+        return 'All Data';
+    }
+  };
+
+  // Handle view change and reset relevant filters
+  const handleViewChange = (view: ViewType) => {
+    setActiveView(view);
+    // Reset view-specific filters
+    setDirectionFilter([]);
+    setStatusFilter([]);
+    setSettlementFilter([]);
+    setPayerFilter([]);
+    setMerchantFilter([]);
+  };
+
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>All Spending Data</h1>
-          <p className={styles.subtitle}>{getPeriodLabel()}</p>
+    <div className={styles.page}>
+      {/* Sticky Navigation Header */}
+      <nav className={styles.stickyNav}>
+        <div className={styles.navContent}>
+          <div className={styles.navBrand}>
+            <span className={styles.navLogo}>🔍</span>
+            <span className={styles.navTitle}>Explore Data</span>
+          </div>
+          <div className={styles.navActions}>
+            <div className={styles.navLinks}>
+              <button onClick={() => navigate('/insights')} className={styles.navLink}>
+                <span className={styles.navIcon}>💡</span>
+                <span>Insights</span>
+              </button>
+              <button onClick={() => navigate('/story')} className={styles.navLink}>
+                <span className={styles.navIcon}>✨</span>
+                <span>Story</span>
+              </button>
+              <button onClick={() => navigate('/explore-data')} className={styles.navLink}>
+                <span className={styles.navIcon}>🔍</span>
+                <span>Explore</span>
+              </button>
+            </div>
+            <ThemeSwitcher />
+          </div>
         </div>
-        <button onClick={() => navigate('/story')} className={styles.backButton}>
-          ← Back to Story
-        </button>
-      </div>
+      </nav>
+
+      <div className={styles.container}>
+        {/* Compact Header */}
+        <div className={styles.compactHeader}>
+          <div className={styles.headerLeft}>
+            <h1 className={styles.compactTitle}>{getViewTitle()}</h1>
+            <p className={styles.compactSubtitle}>{getPeriodLabel()}</p>
+          </div>
+
+          {/* View Tabs */}
+          <div className={styles.compactTabs}>
+            <button
+              className={`${styles.compactTab} ${activeView === 'activity' ? styles.compactTabActive : ''}`}
+              onClick={() => handleViewChange('activity')}
+            >
+              <span className={styles.compactTabIcon}>📱</span>
+              <span className={styles.compactTabLabel}>Activity</span>
+            </button>
+            <button
+              className={`${styles.compactTab} ${activeView === 'transaction' ? styles.compactTabActive : ''}`}
+              onClick={() => handleViewChange('transaction')}
+            >
+              <span className={styles.compactTabIcon}>💳</span>
+              <span className={styles.compactTabLabel}>Transactions</span>
+            </button>
+            <button
+              className={`${styles.compactTab} ${activeView === 'group_expense' ? styles.compactTabActive : ''}`}
+              onClick={() => handleViewChange('group_expense')}
+            >
+              <span className={styles.compactTabIcon}>👥</span>
+              <span className={styles.compactTabLabel}>Group Expenses</span>
+            </button>
+          </div>
+        </div>
 
       {/* Summary Cards */}
       <div className={styles.summaryCards}>
@@ -427,6 +662,7 @@ export default function DataTable() {
 
       {/* Filters */}
       <div className={styles.filters}>
+        {/* Common filters for all views */}
         <div className={styles.filterGroup}>
           <label htmlFor="year-filter" className={styles.filterLabel}>
             Time Period:
@@ -439,8 +675,7 @@ export default function DataTable() {
               if (e.target.value === 'lifetime' || e.target.value === 'all') {
                 setMonthFilter('all');
               }
-              // Reset merchant filter when year changes
-              setMerchantFilter('all');
+              setMerchantFilter([]);
             }}
             className={styles.filterSelect}
           >
@@ -463,8 +698,7 @@ export default function DataTable() {
             value={monthFilter}
             onChange={e => {
               setMonthFilter(e.target.value);
-              // Reset merchant filter when month changes
-              setMerchantFilter('all');
+              setMerchantFilter([]);
             }}
             className={styles.filterSelect}
             disabled={yearFilter === 'lifetime' || yearFilter === 'all'}
@@ -477,68 +711,81 @@ export default function DataTable() {
           </select>
         </div>
 
-        <div className={styles.filterGroup}>
-          <label htmlFor="category-filter" className={styles.filterLabel}>
-            Category:
-          </label>
-          <select
-            id="category-filter"
-            value={categoryFilter}
-            onChange={e => {
-              setCategoryFilter(e.target.value);
-              // Reset merchant filter when category changes
-              setMerchantFilter('all');
-            }}
-            className={styles.filterSelect}
-          >
-            <option value="all">All Categories</option>
-            {categories.map(cat => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
+        <MultiSelect
+          label="Category"
+          options={categories}
+          selectedValues={categoryFilter}
+          onChange={(values) => {
+            setCategoryFilter(values);
+            setMerchantFilter([]);
+          }}
+          placeholder="All Categories"
+        />
 
-        <div className={styles.filterGroup}>
-          <label htmlFor="type-filter" className={styles.filterLabel}>
-            Type:
-          </label>
-          <select
-            id="type-filter"
-            value={typeFilter}
-            onChange={e => {
-              setTypeFilter(e.target.value);
-              // Reset merchant filter when type changes
-              setMerchantFilter('all');
-            }}
-            className={styles.filterSelect}
-          >
-            <option value="all">All Types</option>
-            <option value="activity">Activity</option>
-            <option value="transaction">Transaction</option>
-          </select>
-        </div>
+        {/* Activity view specific filters */}
+        {activeView === 'activity' && (
+          <>
+            <MultiSelect
+              label="Direction"
+              options={['sent', 'received', 'paid', 'request']}
+              selectedValues={directionFilter}
+              onChange={setDirectionFilter}
+              placeholder="All Directions"
+            />
 
-        <div className={styles.filterGroup}>
-          <label htmlFor="merchant-filter" className={styles.filterLabel}>
-            Merchant:
-          </label>
-          <select
-            id="merchant-filter"
-            value={merchantFilter}
-            onChange={e => setMerchantFilter(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="all">All Merchants ({merchants.length})</option>
-            {merchants.map(merchant => (
-              <option key={merchant} value={merchant}>
-                {merchant}
-              </option>
-            ))}
-          </select>
-        </div>
+            <MultiSelect
+              label={`Merchant (${merchants.length})`}
+              options={merchants}
+              selectedValues={merchantFilter}
+              onChange={setMerchantFilter}
+              placeholder="All Merchants"
+            />
+          </>
+        )}
 
+        {/* Transaction view specific filters */}
+        {activeView === 'transaction' && (
+          <>
+            <MultiSelect
+              label="Status"
+              options={['Completed', 'Pending', 'Failed']}
+              selectedValues={statusFilter}
+              onChange={setStatusFilter}
+              placeholder="All Status"
+            />
+
+            <MultiSelect
+              label={`Merchant (${merchants.length})`}
+              options={merchants}
+              selectedValues={merchantFilter}
+              onChange={setMerchantFilter}
+              placeholder="All Merchants"
+            />
+          </>
+        )}
+
+        {/* Group Expense view specific filters */}
+        {activeView === 'group_expense' && (
+          <>
+            <MultiSelect
+              label="Settlement"
+              options={['PAID_RECEIVED', 'UNPAID']}
+              selectedValues={settlementFilter}
+              onChange={setSettlementFilter}
+              placeholder="All Settlement Status"
+            />
+
+            <MultiSelect
+              label={`Payer (${payers.length})`}
+              options={payers}
+              selectedValues={payerFilter}
+              onChange={setPayerFilter}
+              placeholder="All Payers"
+            />
+          </>
+        )}
+
+        {/* Search filter for all views */}
         <div className={styles.filterGroup}>
           <label htmlFor="search" className={styles.filterLabel}>
             Search:
@@ -644,6 +891,10 @@ export default function DataTable() {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Footer */}
+      <Footer />
       </div>
     </div>
   );

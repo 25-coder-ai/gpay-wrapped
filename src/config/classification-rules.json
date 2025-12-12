@@ -192,7 +192,11 @@
         "vodafone",
         "broadband",
         "fiber",
-        "air fiber"
+        "air fiber",
+        "cred",
+        "credit card",
+        "cc payment",
+        "card payment"
       ],
       "patterns": [],
       "exactMatches": {
@@ -202,7 +206,8 @@
         "ATRIA CONVERGENCE TECHNOLOGIES": true,
         "ACT BROADBAND": true,
         "ACTCORP": true,
-        "Air Fiber": true
+        "Air Fiber": true,
+        "CRED": true
       }
     },
     "Healthcare": {

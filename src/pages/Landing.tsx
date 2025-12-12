@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DropZone from '../components/upload/DropZone';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import styles from './Landing.module.css';
 
 export default function Landing() {
@@ -24,6 +25,10 @@ export default function Landing() {
 
   return (
     <div className={styles.landing}>
+      <div className={styles.themeSwitcherContainer}>
+        <ThemeSwitcher />
+      </div>
+
       <a
         href="https://github.com/sureshdsk/gpay-wrapped"
         target="_blank"
@@ -75,6 +80,8 @@ export default function Landing() {
         <div className={styles.attribution}>
           <p className={styles.builtBy}>
             Made with ❤️ by <a href="https://www.linkedin.com/in/sureshdsk/" target="_blank" rel="noopener noreferrer" className={styles.authorLink}>@sureshdsk</a>
+            {'  '} | {'  '}
+            <a href="/about" className={styles.aboutLink}>About GPay Wrapped</a>
           </p>
         </div>
       </footer>

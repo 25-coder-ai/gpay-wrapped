@@ -1,11 +1,14 @@
 .wrapped {
-  @apply h-screen bg-black flex flex-col overflow-hidden;
+  @apply h-screen flex flex-col overflow-hidden;
+  background: #1a1a1a;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  position: relative;
 }
 
 /* Header */
 .header {
   @apply flex items-center justify-center py-3 px-4;
+  position: relative;
 }
 
 .headerTitle {
@@ -158,14 +161,6 @@
   filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.4));
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
 
 .slideTitle {
   @apply text-lg font-bold mb-2;
@@ -197,6 +192,15 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 
