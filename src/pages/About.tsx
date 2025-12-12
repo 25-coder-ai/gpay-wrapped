@@ -166,6 +166,11 @@ export default function About() {
                 <div className={styles.techDesc}>Testing</div>
               </div>
               <div className={styles.techCard}>
+                <div className={styles.techIcon}>🔍</div>
+                <div className={styles.techName}>Chrome DevTools MCP</div>
+                <div className={styles.techDesc}>Browser Debugging</div>
+              </div>
+              <div className={styles.techCard}>
                 <div className={styles.techIcon}>🌐</div>
                 <div className={styles.techName}>Cloudflare Pages</div>
                 <div className={styles.techDesc}>Hosting</div>
