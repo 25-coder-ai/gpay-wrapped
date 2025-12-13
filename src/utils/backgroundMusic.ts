@@ -52,6 +52,8 @@ class BackgroundMusicManager {
   pause() {
     if (this.audio && !this.audio.paused) {
       this.audio.pause();
+      // Reset to beginning for next play
+      this.audio.currentTime = 0;
     }
   }
 

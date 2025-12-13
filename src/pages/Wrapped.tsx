@@ -383,6 +383,7 @@ export default function Wrapped() {
       } else if (e.key === 'ArrowRight') {
         nextSlide();
       } else if (e.key === 'Escape') {
+        bgMusic.pause();
         navigate('/insights');
       }
     };
@@ -403,7 +404,8 @@ export default function Wrapped() {
 
     return () => {
       clearTimeout(timer);
-      // Don't pause music on unmount - let it continue playing
+      // Pause music when leaving the page
+      bgMusic.pause();
     };
   }, []);
 
@@ -425,6 +427,8 @@ export default function Wrapped() {
     
     setIsSharing(true);
     try {
+      const currentSlideData = slides[currentSlide];
+      
       // Disable animations for export by adding a class
       slideRef.current.classList.add(styles.exportMode);
 
@@ -432,26 +436,59 @@ export default function Wrapped() {
       void slideRef.current.offsetHeight;
 
       // Wait for layout to stabilize and background to render
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const canvas = await html2canvas(slideRef.current, {
-        backgroundColor: null,
-        scale: 3,
+        backgroundColor: '#000000', // Black background for any transparent areas
+        scale: 4, // Higher quality
         useCORS: true,
-        logging: true, // Enable logging to debug
-        allowTaint: false,
-        imageTimeout: 0,
+        logging: false,
+        allowTaint: true,
+        imageTimeout: 15000,
         windowWidth: slideRef.current.scrollWidth,
         windowHeight: slideRef.current.scrollHeight,
         onclone: (clonedDoc) => {
           // Ensure the cloned element has proper styling
           const clonedSlide = clonedDoc.querySelector(`.${styles.slide}`) as HTMLElement;
-          if (clonedSlide && slideRef.current) {
-            // Copy the computed background from the original element
-            const computedStyle = window.getComputedStyle(slideRef.current);
-            clonedSlide.style.background = computedStyle.background;
+          if (clonedSlide) {
+            // Keep the original background with blobs/particles
             clonedSlide.style.opacity = '1';
-            clonedSlide.style.isolation = 'isolate';
+            clonedSlide.style.position = 'relative';
+            clonedSlide.style.overflow = 'hidden';
+            
+            // Ensure blob container is visible if using blobs
+            const blobContainer = clonedSlide.querySelector(`.${styles.blobContainer}`) as HTMLElement;
+            if (blobContainer) {
+              blobContainer.style.opacity = '1';
+              const blobs = blobContainer.querySelectorAll('[class*="blob"]');
+              blobs.forEach((blob: any) => {
+                if (blob.style) {
+                  blob.style.opacity = '0.8';
+                }
+              });
+            }
+            
+            // Ensure particles are visible if using particles
+            const particleContainer = clonedSlide.querySelector(`.${styles.particleContainer}`) as HTMLElement;
+            if (particleContainer) {
+              particleContainer.style.opacity = '1';
+            }
+            
+            // Ensure mesh is visible if using mesh
+            const meshContainer = clonedSlide.querySelector(`.${styles.meshContainer}`) as HTMLElement;
+            if (meshContainer) {
+              meshContainer.style.opacity = '1';
+            }
+            
+            // Make all text white for contrast
+            const allTextElements = clonedSlide.querySelectorAll('.slideTitle, .slideValue, .slideSubtitle, .slideDetail, .watermark');
+            allTextElements.forEach((el: any) => {
+              if (el.style) {
+                el.style.color = '#ffffff';
+                el.style.opacity = '1';
+                el.style.textShadow = '0 4px 20px rgba(0, 0, 0, 0.5)';
+              }
+            });
           }
         },
       });
@@ -748,7 +785,10 @@ export default function Wrapped() {
       <div className={styles.actions}>
         <button
           className={styles.exitButton}
-          onClick={() => navigate('/insights')}
+          onClick={() => {
+            bgMusic.pause();
+            navigate('/insights');
+          }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
