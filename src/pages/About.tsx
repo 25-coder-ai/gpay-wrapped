@@ -214,6 +214,47 @@ export default function About() {
                 <div className={styles.teamName}>Nisanth Kennath</div>
                 <div className={styles.teamRole}>Developer</div>
               </a>
+              <a
+                href="https://www.linkedin.com/in/athira-anish-a69530323/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.teamCard}
+              >
+                <div className={styles.teamIcon}>👩‍💻</div>
+                <div className={styles.teamName}>Athira Anish</div>
+                <div className={styles.teamRole}>Developer</div>
+              </a>
+              <a
+                href="https://github.com/25-coder-ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.teamCard}
+              >
+                <div className={styles.teamIcon}>👩‍💻</div>
+                <div className={styles.teamName}>Dakshithaa</div>
+                <div className={styles.teamRole}>Developer</div>
+              </a>
+            </div>
+          </section>
+
+          {/* Credits */}
+          <section className={styles.section}>
+            <h2 className={styles.sectionTitle}>
+              <span className={styles.emoji}>🎵</span> Credits
+            </h2>
+            <div className={styles.text}>
+              <p>
+                Music provided by{' '}
+                <a
+                  href="https://ncs.io/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.link}
+                >
+                  NCS (NoCopyrightSounds)
+                </a>
+                , a copyright-free music label offering high-quality tracks for creators.
+              </p>
             </div>
           </section>
 
