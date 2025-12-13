@@ -30,7 +30,7 @@ export default function Landing() {
       </div>
 
       <a
-        href="https://github.com/sureshdsk/gpay-wrapped"
+        href="https://github.com/sureshdsk/finn-lens"
         target="_blank"
         rel="noopener noreferrer"
         className={styles.githubButton}
@@ -73,7 +73,16 @@ export default function Landing() {
         <div className={styles.disclaimers}>
           <p className={styles.disclaimer}>
             <span className={styles.disclaimerIcon}>ℹ️</span>
-            Not affiliated with Google or Google Pay. This is an independent, open-source project.
+            Not affiliated with Google or Google Pay. This is an independent,{' '}
+            <a
+              href="https://github.com/sureshdsk/finn-lens"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.projectLink}
+            >
+              open-source project
+            </a>
+            .
           </p>
         </div>
 

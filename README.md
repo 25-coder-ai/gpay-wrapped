@@ -79,9 +79,9 @@ FinnLens analyzes your data to provide insights like:
 
 ```bash
 # Clone the repository
-git clone git@github.com:sureshdsk/gpay-wrapped.git
+git clone git@github.com:sureshdsk/finn-lens.git
 OR
-git clone https://github.com/sureshdsk/gpay-wrapped.git
+git clone https://github.com/sureshdsk/finn-lens.git
 cd finnlens
 
 # Install dependencies

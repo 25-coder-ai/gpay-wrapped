@@ -270,7 +270,7 @@ export default function About() {
               </p>
               <div className={styles.buttonGroup}>
                 <a
-                  href="https://github.com/sureshdsk/gpay-wrapped"
+                  href="https://github.com/sureshdsk/finn-lens"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={styles.primaryButton}

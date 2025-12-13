@@ -16,7 +16,7 @@ export default function Footer() {
           <span className={styles.disclaimerIcon}>ℹ️</span>
           Not affiliated with Google or Google Pay. This is an independent,{' '}
           <a
-            href="https://github.com/sureshdsk/gpay-wrapped"
+            href="https://github.com/sureshdsk/finn-lens"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.projectLink}
