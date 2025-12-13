@@ -14,7 +14,7 @@ interface SlideData {
   value: string;
   subtitle: string;
   icon: string;
-  gradient: string;
+  bgColor: string;
   detail?: string;
 }
 
@@ -42,6 +42,7 @@ export default function Wrapped() {
   const { parsedData, insights, selectedYear } = useDataStore();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
+  const [bgStyle, setBgStyle] = useState<'blobs' | 'mesh' | 'particles'>('blobs');
   const slideRef = useRef<HTMLDivElement>(null);
 
   // Generate slides from insights and data
@@ -71,7 +72,7 @@ export default function Wrapped() {
         value: selectedYear === 'all' ? 'All Time' : selectedYear,
         subtitle: 'Wrapped',
         icon: '🎉',
-        gradient: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', // Hot pink to purple
+        bgColor: '#8338ec'
       },
       // Total spent
       {
@@ -80,7 +81,7 @@ export default function Wrapped() {
         value: `₹${formatAmount(totalSpent)}`,
         subtitle: `across ${filteredActivities.length + filteredTransactions.length} transactions`,
         icon: '💸',
-        gradient: 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', // Amber to red
+        bgColor: '#d6249f'
       },
     ];
 
@@ -96,7 +97,7 @@ export default function Wrapped() {
             value: `₹${formatAmount(data.totalSent.value)}`,
             subtitle: `sent to friends & family`,
             icon: data.flowDirection === 'giver' ? '🎁' : data.flowDirection === 'receiver' ? '🧲' : '⚖️',
-            gradient: 'linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)', // Cyan to blue
+            bgColor: '#FE5196',
             detail: `Received ₹${formatAmount(data.totalReceived.value)} back`,
           });
           break;
@@ -109,7 +110,7 @@ export default function Wrapped() {
             value: data.topCategory,
             subtitle: `₹${formatAmount(data.topCategoryAmount.value)} spent`,
             icon: getCategoryIcon(data.topCategory),
-            gradient: 'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)', // Amber to orange
+            bgColor: '#ff6b9d',
             detail: `${data.topCategoryCount} transactions`,
           });
           break;
@@ -122,7 +123,7 @@ export default function Wrapped() {
             value: `${data.peakDay}s`,
             subtitle: `at ${data.peakHour}:00`,
             icon: data.nightOwlScore > 30 ? '🦉' : '☀️',
-            gradient: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%)', // Purple to pink
+            bgColor: '#fc8bff',
             detail: data.nightOwlScore > 30 ? `${data.nightOwlScore}% payments after 10pm` : undefined,
           });
           break;
@@ -136,7 +137,7 @@ export default function Wrapped() {
               value: data.mostFrequentPartner,
               subtitle: `₹${formatAmount(data.totalAmount.value)}`,
               icon: '👤',
-              gradient: 'linear-gradient(135deg, #10B981 0%, #06B6D4 100%)', // Green to cyan
+              bgColor: '#3a47d5',
               detail: `${data.transactionCount} transactions`,
             });
           }
@@ -151,7 +152,7 @@ export default function Wrapped() {
             value: date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }),
             subtitle: `₹${formatAmount(data.amount)} spent`,
             icon: '📅',
-            gradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)', // Red to dark red
+            bgColor: '#DC2626', // Dark red
           });
           break;
         }
@@ -163,7 +164,7 @@ export default function Wrapped() {
             value: `${data.totalDomains}`,
             subtitle: `domains purchased`,
             icon: '🌐',
-            gradient: 'linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%)', // Blue to purple
+            bgColor: '#8B5CF6', // Purple
             detail: data.mostRenewed ? `Most renewed: ${data.mostRenewed}` : undefined,
           });
           break;
@@ -176,7 +177,7 @@ export default function Wrapped() {
             value: `${data.reliabilityScore}%`,
             subtitle: 'reliability score',
             icon: '🏆',
-            gradient: 'linear-gradient(135deg, #D97706 0%, #F59E0B 100%)', // Dark amber to amber (darker for contrast)
+            bgColor: '#F59E0B', // Amber
             detail: `Paid ${data.paidCount}/${data.totalCount} splits`,
           });
           break;
@@ -189,7 +190,7 @@ export default function Wrapped() {
             value: `${data.totalVouchers}`,
             subtitle: 'vouchers earned',
             icon: '🎁',
-            gradient: 'linear-gradient(135deg, #DB2777 0%, #E11D48 100%)', // Darker pink to darker rose
+            bgColor: '#E11D48', // Rose
             detail: data.expired > 0 ? `${data.expired} expired (${data.wastePercentage}%)` : undefined,
           });
           break;
@@ -203,7 +204,7 @@ export default function Wrapped() {
             value: data.yearsSince,
             subtitle: 'years of transactions',
             icon: '📅',
-            gradient: 'linear-gradient(135deg, #0891B2 0%, #059669 100%)', // Darker cyan to darker green
+            bgColor: '#059669', // Green
             detail: `Since ${firstDate.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}`,
           });
           break;
@@ -216,7 +217,7 @@ export default function Wrapped() {
             value: data.partnerName,
             subtitle: `${data.splitCount} splits together`,
             icon: '🤝',
-            gradient: 'linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%)', // Purple to indigo
+            bgColor: '#6366F1', // Indigo
           });
           break;
         }
@@ -228,7 +229,7 @@ export default function Wrapped() {
             value: `₹${formatAmount(data.totalRewards)}`,
             subtitle: 'cashback earned',
             icon: '🎯',
-            gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', // Green to dark green
+            bgColor: '#10B981', // Green
             detail: `${data.rewardCount} rewards`,
           });
           break;
@@ -241,7 +242,7 @@ export default function Wrapped() {
             value: `${data.createdCount}`,
             subtitle: 'group expenses created',
             icon: '👨‍👩‍👧‍👦',
-            gradient: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', // Amber to dark amber
+            bgColor: '#D97706', // Dark amber
             detail: `Total: ₹${formatAmount(data.totalAmount)}`,
           });
           break;
@@ -254,7 +255,7 @@ export default function Wrapped() {
             value: `${data.peopleCount}`,
             subtitle: 'people in your circle',
             icon: '👥',
-            gradient: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)', // Indigo to purple
+            bgColor: '#8B5CF6', // Purple
             detail: `${data.groupCount} groups`,
           });
           break;
@@ -267,7 +268,7 @@ export default function Wrapped() {
             value: `${data.maxTransactionsInDay}`,
             subtitle: 'transactions in one day',
             icon: '⚡',
-            gradient: 'linear-gradient(135deg, #D97706 0%, #DC2626 100%)', // Dark amber to red (more vibrant)
+            bgColor: '#DC2626', // Red
             detail: `${data.maxTransactionsInHour} in one hour`,
           });
           break;
@@ -280,7 +281,7 @@ export default function Wrapped() {
             value: `${data.longestStreak} days`,
             subtitle: 'longest streak',
             icon: '🔥',
-            gradient: 'linear-gradient(135deg, #F97316 0%, #EF4444 100%)', // Orange to red
+            bgColor: '#EF4444', // Red
           });
           break;
         }
@@ -292,7 +293,7 @@ export default function Wrapped() {
             value: `${data.lateNightCount}`,
             subtitle: 'late night payments',
             icon: '🌙',
-            gradient: 'linear-gradient(135deg, #6366F1 0%, #3B82F6 100%)', // Indigo to blue
+            bgColor: '#3B82F6', // Blue
             detail: `Latest: ${data.latestHour}:00`,
           });
           break;
@@ -305,7 +306,7 @@ export default function Wrapped() {
             value: `₹${data.amount.value}`,
             subtitle: 'smallest payment',
             icon: '🪙',
-            gradient: 'linear-gradient(135deg, #10B981 0%, #14B8A6 100%)', // Green to teal
+            bgColor: '#14B8A6', // Teal
             detail: data.description,
           });
           break;
@@ -318,7 +319,7 @@ export default function Wrapped() {
             value: `${data.roundPercentage}%`,
             subtitle: 'payments in round numbers',
             icon: '💯',
-            gradient: 'linear-gradient(135deg, #EC4899 0%, #D946EF 100%)', // Pink to fuchsia
+            bgColor: '#D946EF', // Fuchsia
             detail: `Favorite: ₹${data.favoriteRoundNumber}`,
           });
           break;
@@ -333,7 +334,7 @@ export default function Wrapped() {
       value: 'GPay Wrapped',
       subtitle: selectedYear === 'all' ? 'All Time' : selectedYear,
       icon: '✨',
-      gradient: 'linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%)', // Hot pink to purple (same as intro)
+      bgColor: '#8B5CF6', // Purple
       detail: 'Share with friends!',
     });
 
@@ -408,10 +409,10 @@ export default function Wrapped() {
       // Disable animations for export by adding a class
       slideRef.current.classList.add(styles.exportMode);
 
-      // Force a repaint to ensure gradient is rendered
+      // Force a repaint to ensure background is rendered
       void slideRef.current.offsetHeight;
 
-      // Wait for layout to stabilize and gradient to render
+      // Wait for layout to stabilize and background to render
       await new Promise(resolve => setTimeout(resolve, 300));
 
       const canvas = await html2canvas(slideRef.current, {
@@ -489,6 +490,30 @@ export default function Wrapped() {
       {/* Header */}
       <div className={styles.header}>
         <h1 className={styles.headerTitle}>GPay Wrapped {selectedYear === 'all' ? 'All Time' : selectedYear}</h1>
+        {/* Background Style Selector */}
+        <div className={styles.bgSelector}>
+          <button 
+            className={`${styles.bgBtn} ${bgStyle === 'blobs' ? styles.active : ''}`}
+            onClick={() => setBgStyle('blobs')}
+            title="Blob Animation"
+          >
+            🫧
+          </button>
+          <button 
+            className={`${styles.bgBtn} ${bgStyle === 'mesh' ? styles.active : ''}`}
+            onClick={() => setBgStyle('mesh')}
+            title="Geometric Mesh"
+          >
+            🔺
+          </button>
+          <button 
+            className={`${styles.bgBtn} ${bgStyle === 'particles' ? styles.active : ''}`}
+            onClick={() => setBgStyle('particles')}
+            title="Particle System"
+          >
+            ✨
+          </button>
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -517,17 +542,134 @@ export default function Wrapped() {
         </button>
 
         <div className={styles.slideWrapper}>
-          <div
-            ref={slideRef}
+          <div 
+            ref={slideRef} 
             className={styles.slide}
-            style={{ background: slide.gradient }}
+            style={{ position: 'relative', overflow: 'hidden' }}
           >
+            {/* Dynamic Background based on selection */}
+            {bgStyle === 'blobs' && (
+              <div className={styles.blobContainer}>
+                <div 
+                  className={styles.blob1} 
+                  style={{ backgroundColor: slide.bgColor }}
+                />
+                <div 
+                  className={styles.blob2} 
+                  style={{ backgroundColor: slide.bgColor, opacity: 0.7 }}
+                />
+                <div 
+                  className={styles.blob3} 
+                  style={{ backgroundColor: slide.bgColor, opacity: 0.5 }}
+                />
+              </div>
+            )}
+            
+            {bgStyle === 'mesh' && (
+              <div className={styles.meshContainer}>
+                <svg className={styles.triangleMesh} viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+                  <defs>
+                    <linearGradient id="meshGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" style={{ stopColor: slide.bgColor, stopOpacity: 0.6 }} />
+                      <stop offset="100%" style={{ stopColor: slide.bgColor, stopOpacity: 0.2 }} />
+                    </linearGradient>
+                  </defs>
+                  <g>
+                    {[...Array(20)].map((_, i) => {
+                      const x = (i % 5) * 100 + Math.random() * 20;
+                      const y = Math.floor(i / 5) * 100 + Math.random() * 20;
+                      const x2 = x + 80 + Math.random() * 20;
+                      const y2 = y + Math.random() * 40;
+                      const x3 = x + Math.random() * 40;
+                      const y3 = y + 80 + Math.random() * 20;
+                      return (
+                        <polygon
+                          key={i}
+                          points={`${x},${y} ${x2},${y2} ${x3},${y3}`}
+                          fill="url(#meshGrad)"
+                          stroke={slide.bgColor}
+                          strokeWidth="0.5"
+                          opacity="0.3"
+                          className={styles.meshTriangle}
+                          style={{ animationDelay: `${i * 0.1}s` }}
+                        />
+                      );
+                    })}
+                  </g>
+                </svg>
+              </div>
+            )}
+            
+            {bgStyle === 'particles' && (
+              <div className={styles.particleContainer}>
+                {[...Array(30)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={styles.particleDot}
+                    style={{
+                      backgroundColor: slide.bgColor,
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 5}s`,
+                      animationDuration: `${10 + Math.random() * 20}s`,
+                      width: `${2 + Math.random() * 4}px`,
+                      height: `${2 + Math.random() * 4}px`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            
+            {/* Animated background elements */}
+            <div className={styles.animatedBg}>
+              <div className={styles.particle1}></div>
+              <div className={styles.particle2}></div>
+              <div className={styles.particle3}></div>
+              <div className={styles.glowOrb}></div>
+              
+              {/* Floating emojis */}
+              <div className={styles.floatingEmoji1}>✨</div>
+              <div className={styles.floatingEmoji2}>💫</div>
+              <div className={styles.floatingEmoji3}>⭐</div>
+              
+              {/* Animated shapes */}
+              <div className={styles.shape1}></div>
+              <div className={styles.shape2}></div>
+              
+              {/* New creative elements */}
+              <div className={styles.wavePattern}></div>
+              <div className={styles.hexGrid}>
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className={styles.hex} style={{animationDelay: `${i * 0.2}s`}}></div>
+                ))}
+              </div>
+              
+              {/* Neon lines removed */}
+              
+              {/* Bubble effects */}
+              {[...Array(5)].map((_, i) => (
+                <div 
+                  key={`bubble-${i}`}
+                  className={styles.bubble}
+                  style={{
+                    left: `${20 + i * 15}%`,
+                    animationDelay: `${i * 0.5}s`,
+                    width: `${30 + i * 10}px`,
+                    height: `${30 + i * 10}px`
+                  }}
+                />
+              ))}
+            </div>
+            
             <div className={styles.slideContent}>
               <div className={styles.slideIcon}>{slide.icon}</div>
               <h2 className={styles.slideTitle}>{slide.title}</h2>
               <div className={styles.slideValue}>{slide.value}</div>
               <p className={styles.slideSubtitle}>{slide.subtitle}</p>
               {slide.detail && <p className={styles.slideDetail}>{slide.detail}</p>}
+              
+              {/* Celebration burst removed */}
+              
               <div className={styles.watermark}>gpay-wrapped.pages.dev</div>
             </div>
           </div>
